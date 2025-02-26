@@ -26,17 +26,14 @@ class Clock:
 
 # ------------------------------------------------------------ #
 class Window:
-    def __init__(self, size: list[int], color: list[int]=[25, 25, 25]) -> None:
+    def __init__(self, size: list[int], display_size: list[int], color: list[int]=[25, 25, 25]) -> None:
         self.icon = None
         self.title = None
         self.size = size
         self.color = color
-        self.zoom: float = 1.0
-        self.zoom_min: float = 0.3
-        self.zoom_max: float = 1.0
         self.clip_range = [1, 1]
+        self.display_size = display_size
         self.window = pg.display.set_mode(size)
-        self.display_size = [*map(lambda s: s / self.zoom, self.size)]
         self.display = pg.Surface(self.display_size)
 
     def set_title(self, title: str) -> None: self.title = title
@@ -46,10 +43,6 @@ class Window:
         if isinstance(self.title, str): pg.display.set_caption(self.title)
         if isinstance(self.icon, pg.Surface): pg.display.set_icon(self.icon)
 
-    def mod_zoom(self, delta: float) -> None:
-        self.zoom = max(self.zoom_min, min(self.zoom_max, self.zoom + delta))
-        self.display_size = [*map(lambda s: s / self.zoom, self.size)]
-
     def clear(self) -> None:
         self.display.fill(self.color)
         self.window.fill(self.color)
@@ -58,11 +51,11 @@ class Window:
         self.draw_rect(rect.size, rect.topleft, color, width)
 
     def blit(self, surface: pg.Surface, location: list[int], offset: list[int]=[0, 0]) -> None:
-        if ((location[0] + surface.size[0]) - self.clip_range[0] < 0 or location[0] + self.clip_range[0] > self.size[0]) \
-        or ((location[1] + surface.size[1]) - self.clip_range[1] < 0 or location[1] + self.clip_range[1] > self.size[1]):
+        # display-culling
+        if ((location[0] + surface.size[0]) - self.clip_range[0] < 0 or location[0] + self.clip_range[0] > self.display_size[0]) \
+        or ((location[1] + surface.size[1]) - self.clip_range[1] < 0 or location[1] + self.clip_range[1] > self.display_size[1]):
             return
-        self.display.blit(surface, [location[0], location[1]])
-        # self.display.blit(surface, [location[0] - offset[0], location[1] - offset[1]])
+        self.display.blit(surface, [location[0] - offset[0], location[1] - offset[1]])
     
     def draw_line(self, start: list[int|float], end: list[int|float], color: list[int]=[255, 255, 255], width: int=1) -> None :
         pg.draw.line(self.display, color, start, end, width=width)
@@ -74,10 +67,6 @@ class Window:
         pg.draw.circle(self.display, color, [*map(int, center)], radius, width)
 
     def update(self) -> None:
-        self.window.blit(
-            pg.transform.scale(self.display, self.display_size),
-            [0, 0]
-        )
         pg.display.flip()
 # ------------------------------------------------------------ #
 
@@ -186,13 +175,21 @@ class Camera:
         if vx: self.velocity[0] = vx
         if vy: self.velocity[1] = vy
 
-    def mod_viewport(self, dx: float = 0.0, dy: float = 0.0) -> list[int]:
-        self.viewport_size[0] = max(1, min(self.viewport_size[0] + dx, self.bounds[0]))
-        self.viewport_size[1] = max(1, min(self.viewport_size[1] + dy, self.bounds[1]))
-        self.center = [
-            self.location[0] + self.viewport_size[0] / 2,
-            self.location[1] + self.viewport_size[1] / 2
-        ]
+    def mod_viewport(self, delta: float) -> list[int]:
+        aspect_ratio = self.viewport_size[0] / self.viewport_size[1]
+
+        new_width = min(self.bounds[0], max((self.bounds[0] / 10) * 2, self.viewport_size[0] + delta))
+        new_height = min(self.bounds[1], max((self.bounds[1] / 10) * 2, self.viewport_size[1] + delta))
+
+        if new_width / new_height != aspect_ratio:
+            if new_width == self.bounds[0]:
+                new_height = new_width / aspect_ratio
+            if new_height == self.bounds[1]:
+                new_width = new_height * aspect_ratio
+
+        self.viewport_size = [new_width, new_height]
+        self.center = [self.location[i] + self.viewport_size[i] / 2 for i in (0, 1)]
+
         return self.viewport_size
 
     def center_on(self, size: list[int], location: list[int|float]) -> None:
@@ -221,22 +218,53 @@ class Camera:
 
 # ------------------------------------------------------------ #
 class Renderer:
+    class FLAGS:
+        SHOW_CAMERA: int = 1 << 1
+
     def __init__(self, window: Window, camera: Camera) -> None:
+        self.flags = 0
         self.window = window
         self.camera = camera
-        
         self.draw_calls = 0
         self._draw_calls = []    # [surface, location]
 
+    def set_flag(self, flag: int) -> None:
+        self.flags |= flag
+
+    def rem_flag(self, flag: int) -> None:
+        if (self.flags & flag) == flag:
+            self.flags &= ~flag
+
     def draw_call(self, surface: pg.Surface, location: list[int]) -> None:
         if self.draw_calls + 1 > 4096: return
+
+        # frustum-culling
+        if ((location[0] + surface.size[0]) - self.window.clip_range[0] < self.camera.location[0] or location[0] + self.window.clip_range[0] > self.camera.location[0] + self.camera.viewport_size[0])\
+        or ((location[1] + surface.size[1]) - self.window.clip_range[1] < self.camera.location[1] or location[1] + self.window.clip_range[1] > self.camera.location[1] + self.camera.viewport_size[1]):
+            return
 
         self._draw_calls.append([surface, location])
         self.draw_calls += 1
 
     def render(self) -> None:
+        self.window.clear()
+
+        scale_x = self.window.size[0] / self.camera.viewport_size[0]
+        scale_y = self.window.size[1] / self.camera.viewport_size[1]
+        display_size = [self.window.display_size[0] * scale_x, self.window.display_size[1] * scale_y]
+
         for i in range(self.draw_calls):
             surface, location = self._draw_calls.pop()
-            self.window.blit(surface, location, self.camera.location)
+            self.window.blit(surface, location)
         self.draw_calls = 0
+
+        if (self.flags & self.FLAGS.SHOW_CAMERA):
+            self.window.blit_rect(self.camera.get_viewport(), [255, 255, 255], 1)
+            self.window.blit_rect(self.camera.get_center([10, 10]), [0, 255, 0], 1)
+
+        self.window.window.blit(
+            pg.transform.scale(self.window.display, display_size),
+            [0,0]
+            # [-self.camera.location[0] * scale_x, -self.camera.location[1] * scale_y]
+        )
 # ------------------------------------------------------------ #
