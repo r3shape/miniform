@@ -155,14 +155,14 @@ class Camera:
     class MODES:
         CENTER_ON: int = 1
 
-    def __init__(self, bounds: list[int], viewport_size: list[int]):
+    def __init__(self, bounds: list[int]):
         self.mode = 0
         self.drag = 18
         self.speed = 100
         self.bounds = bounds
         self.velocity = [0.0, 0.0]
-        self.viewport_size = viewport_size
         self.location = [bounds[0] / 2, bounds[1] / 2]
+        self.viewport_size = [bounds[0] / 2, bounds[1] / 2]
         self.center = [self.location[0] + self.viewport_size[0] / 2, self.location[1] + self.viewport_size[1] / 2]
 
     def get_center(self, size: list[int]) -> pg.Rect:
@@ -178,8 +178,8 @@ class Camera:
     def mod_viewport(self, delta: float) -> list[int]:
         aspect_ratio = self.viewport_size[0] / self.viewport_size[1]
 
-        new_width = min(self.bounds[0], max((self.bounds[0] / 10) * 2, self.viewport_size[0] + delta))
-        new_height = min(self.bounds[1], max((self.bounds[1] / 10) * 2, self.viewport_size[1] + delta))
+        new_width = min(self.bounds[0], max(260, self.viewport_size[0] + delta))
+        new_height = min(self.bounds[1], max(260, self.viewport_size[1] + delta))
 
         if new_width / new_height != aspect_ratio:
             if new_width == self.bounds[0]:
