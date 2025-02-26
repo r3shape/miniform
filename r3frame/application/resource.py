@@ -264,7 +264,6 @@ class Renderer:
 
         self.window.window.blit(
             pg.transform.scale(self.window.display, display_size),
-            [0,0]
-            # [-self.camera.location[0] * scale_x, -self.camera.location[1] * scale_y]
+            [-self.camera.location[0] * scale_x, -self.camera.location[1] * scale_y]
         )
 # ------------------------------------------------------------ #
