@@ -1,4 +1,4 @@
-from r3frame.utils import damp_lin
+from r3frame.utils import damp_lin, math
 from r3frame.globals import pg, os, re, time
 
 # ------------------------------------------------------------ #
@@ -61,7 +61,8 @@ class Window:
         if ((location[0] + surface.size[0]) - self.clip_range[0] < 0 or location[0] + self.clip_range[0] > self.size[0]) \
         or ((location[1] + surface.size[1]) - self.clip_range[1] < 0 or location[1] + self.clip_range[1] > self.size[1]):
             return
-        self.display.blit(surface, [location[0] - offset[0], location[1] - offset[1]])
+        self.display.blit(surface, [location[0], location[1]])
+        # self.display.blit(surface, [location[0] - offset[0], location[1] - offset[1]])
     
     def draw_line(self, start: list[int|float], end: list[int|float], color: list[int]=[255, 255, 255], width: int=1) -> None :
         pg.draw.line(self.display, color, start, end, width=width)
@@ -162,7 +163,13 @@ class Asset_Manager:
 
 # ------------------------------------------------------------ #
 class Camera:
+    class MODES:
+        CENTER_ON: int = 1
+
     def __init__(self, bounds: list[int], viewport_size: list[int]):
+        self.mode = 0
+        self.drag = 18
+        self.speed = 100
         self.bounds = bounds
         self.velocity = [0.0, 0.0]
         self.viewport_size = viewport_size
@@ -182,37 +189,34 @@ class Camera:
     def mod_viewport(self, dx: float = 0.0, dy: float = 0.0) -> list[int]:
         self.viewport_size[0] = max(1, min(self.viewport_size[0] + dx, self.bounds[0]))
         self.viewport_size[1] = max(1, min(self.viewport_size[1] + dy, self.bounds[1]))
-
         self.center = [
             self.location[0] + self.viewport_size[0] / 2,
             self.location[1] + self.viewport_size[1] / 2
         ]
-
         return self.viewport_size
 
     def center_on(self, size: list[int], location: list[int|float]) -> None:
+        if self.mode != self.MODES.CENTER_ON: self.mode = self.MODES.CENTER_ON
         target_center = [
-            (location[0] - self.viewport_size[0] / 2) + size[0] / 2,
-            (location[1] - self.viewport_size[1] / 2) + size[1] / 2
+            (location[0] + self.viewport_size[0] / 2) + size[0] / 2,
+            (location[1] + self.viewport_size[1] / 2) + size[1] / 2
         ]
-        self.location[0] += target_center[0] - self.location[0]
-        self.location[1] += target_center[1] - self.location[1]
+
+        dist = [
+            (self.center[0] - target_center[0]) + self.viewport_size[0] / 2,
+            (self.center[1] - target_center[1]) + self.viewport_size[1] / 2
+        ]
+    
+        self.velocity = [
+            (-dist[0] * self.speed) * (1 / self.drag),
+            (-dist[1] * self.speed) * (1 / self.drag)
+        ]
 
     def update(self, delta_time: float) -> None:
-        self.location[0] += self.velocity[0] * delta_time
-        self.location[1] += self.velocity[1] * delta_time
-        self.velocity = [damp_lin(v, 100, 1, delta_time) for v in self.velocity]
+        self.velocity = [damp_lin(v, self.speed, 1, delta_time) for v in self.velocity]
+        self.location[0] = max(0, min(self.bounds[0] - self.viewport_size[0], self.location[0] + self.velocity[0] * delta_time))
+        self.location[1] = max(0, min(self.bounds[1] - self.viewport_size[1], self.location[1] + self.velocity[1] * delta_time))
         self.center = [self.location[0] + self.viewport_size[0] / 2, self.location[1] + self.viewport_size[1] / 2]
-        
-        if self.location[0] < 0:
-            self.location[0] = 0
-        elif (self.location[0] + self.viewport_size[0]) > self.bounds[0]:
-            self.location[0] = self.bounds[0] - self.viewport_size[0]
-        
-        if self.location[1] < 0:
-            self.location[1] = 0
-        elif (self.location[1] + self.viewport_size[1]) > self.bounds[1]:
-            self.location[1] = self.bounds[1] - self.viewport_size[1]
 # ------------------------------------------------------------ #
 
 # ------------------------------------------------------------ #
@@ -227,10 +231,6 @@ class Renderer:
     def draw_call(self, surface: pg.Surface, location: list[int]) -> None:
         if self.draw_calls + 1 > 4096: return
 
-        # TODO: this can be shortened
-        if (((location[0] - self.camera.location[0]) + surface.size[0]) - self.window.clip_range[0] < self.camera.location[0] or (location[0] - self.camera.location[0]) + self.window.clip_range[0] > self.camera.location[0] + self.camera.viewport_size[0])\
-        or (((location[1] - self.camera.location[1]) + surface.size[1]) - self.window.clip_range[1] < self.camera.location[1] or (location[1] - self.camera.location[1]) + self.window.clip_range[1] > self.camera.location[1] + self.camera.viewport_size[1]):
-            return
         self._draw_calls.append([surface, location])
         self.draw_calls += 1
 
