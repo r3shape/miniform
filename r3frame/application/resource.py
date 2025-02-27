@@ -65,6 +65,9 @@ class Window:
 
     def draw_circle(self, center: list[int|float], radius: int, color: list[int]=[255, 255, 255], width: int=1):
         pg.draw.circle(self.display, color, [*map(int, center)], radius, width)
+
+    def update(self) -> None:
+        pg.display.flip()
 # ------------------------------------------------------------ #
 
 # ------------------------------------------------------------ #
@@ -308,7 +311,6 @@ class Renderer:
             pg.transform.scale(self.window.display, display_size),
             [-self.camera.location[0] * self.camera.viewport_scale[0], -self.camera.location[1] * self.camera.viewport_scale[1]]
         )
-        pg.display.flip()
 
     def renderLW(self) -> None:
         """
@@ -342,7 +344,6 @@ class Renderer:
         # scale the viewport to match the full window size before displaying
         scaled_surface = pg.transform.scale(viewport, self.window.size)
         self.window.window.blit(scaled_surface, (0, 0))
-        pg.display.flip()
 
     def update(self) -> None:
         """ Updates the renderer, dynamically swapping between large-world rendering and small world rendering based on view scale.
@@ -350,4 +351,46 @@ class Renderer:
         """
         if any(map(lambda s: s >= 0.4, self.camera.viewport_scale)): self.renderLW()
         else: self.renderSW()
+# ------------------------------------------------------------ #
+
+# ------------------------------------------------------------ #
+class DevDisplay:
+    def __init__(self, name: str, window: Window, size: list[int], location: list[float], font_path:str, text_color:list[int]=[255, 255, 255], text_size: int=18):
+        pg.font.init()
+        self.name = name
+        self.window = window
+        self.size: list[int] = size
+        self.location: list[float] = location
+        
+        self.text_size: int = text_size
+        self.text_fields: dict[str, str] = {}
+        self.text_color: list[int] = text_color
+        self.font: pg.Font = pg.Font(font_path, text_size)
+
+    def set_text_field(self, field: str, text: str) -> bool:
+        try:
+            self.text_fields[field] = text
+            return True
+        except KeyError as e:
+            print(f"DevDisplay TextField Not Found: {field}")
+            return False
+    
+    def rem_text_field(self, field: str) -> bool:
+        try:
+            self.text_fields.pop(field)
+            return True
+        except KeyError as e:
+            print(f"DevDisplay TextField Not Found: {field}")
+            return False
+
+    def render(self) -> None:
+        self.window.window.blit(self.font.render(self.name, True, self.text_color), self.location)
+        for index, field in enumerate(self.text_fields.keys()):
+            text = f"{field}: {self.text_fields[field]}"
+            text_surface = self.font.render(text, True, self.text_color)
+            text_location = [
+                self.location[0],
+                self.location[1] + (text_surface.get_size()[1] * (index + 1))
+            ]
+            self.window.window.blit(text_surface, text_location)
 # ------------------------------------------------------------ #

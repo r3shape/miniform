@@ -16,7 +16,7 @@ class Game_Object():
     def set_image(self, image: pg.Surface) -> None:
         if isinstance(image, pg.Surface):
             self.image = image
-        elif isinstance(image, None):
+        elif image is None:
             self.image = pg.Surface(self.size)
             self.image.fill(self.color)
 
