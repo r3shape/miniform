@@ -152,14 +152,20 @@ class Camera:
     class MODES:
         CENTER_ON: int = 1
 
-    def __init__(self, bounds: list[int]):
+    def __init__(self, window: Window):
+        self.window = window
         self.mode = 0
         self.drag = 18
         self.speed = 100
-        self.bounds = bounds
         self.velocity = [0.0, 0.0]
-        self.location = [bounds[0] / 2, bounds[1] / 2]
-        self.viewport_size = [bounds[0] / 2, bounds[1] / 2]
+        self.bounds = window.display_size
+        self.location = [self.bounds[0] / 2, self.bounds[1] / 2]
+        self.viewport_size = [self.bounds[0] / 2, self.bounds[1] / 2]
+        self.viewport_scale = [
+            self.window.size[0] / self.viewport_size[0],
+            self.window.size[1] / self.viewport_size[1]
+        ]
+        self.last_location = self.location
         self.center = [self.location[0] + self.viewport_size[0] / 2, self.location[1] + self.viewport_size[1] / 2]
 
     def get_center(self, size: list[int]) -> pg.Rect:
@@ -208,7 +214,12 @@ class Camera:
         ]
 
     def update(self, delta_time: float) -> None:
-        self.velocity = [damp_lin(v, self.speed, 1, delta_time) for v in self.velocity]
+        self.viewport_scale = [
+            self.window.size[0] / self.viewport_size[0],
+            self.window.size[1] / self.viewport_size[1]
+        ]
+        self.last_location = self.location
+        self.velocity = [damp_lin(v, self.speed, 3, delta_time) for v in self.velocity]
         self.location[0] = max(0, min(self.bounds[0] - self.viewport_size[0], self.location[0] + self.velocity[0] * delta_time))
         self.location[1] = max(0, min(self.bounds[1] - self.viewport_size[1], self.location[1] + self.velocity[1] * delta_time))
         self.center = [self.location[0] + self.viewport_size[0] / 2, self.location[1] + self.viewport_size[1] / 2]
@@ -224,18 +235,18 @@ class Renderer:
     class FLAGS:
         SHOW_CAMERA: int = 1 << 0  # flag to display the camera's viewport boundaries.
 
-    def __init__(self, window: Window, camera: Camera) -> None:
+    def __init__(self, camera: Camera) -> None:
         """
         Initializes the renderer with a target window and camera.
 
         :param window: The game window where rendering occurs.
         :param camera: The camera that defines the viewport.
         """
-        self.flags = 0
-        self.window = window
+        self.window = camera.window
         self.camera = camera
+        self.flags = 0
         self.draw_calls = 0
-        self._draw_calls = []  # stores surfaces and their world-space locations.
+        self._draw_calls = []  # draw_call layout : [surface, location]
 
     def set_flag(self, flag: int) -> None:
         """Enables a rendering flag."""
@@ -279,13 +290,11 @@ class Renderer:
         self.window.clear()
 
         # compute scaling factors based on the viewport and window size.
-        scale_x = self.window.size[0] / self.camera.viewport_size[0]
-        scale_y = self.window.size[1] / self.camera.viewport_size[1]
-        display_size = [self.window.display_size[0] * scale_x, self.window.display_size[1] * scale_y]
+        display_size = [self.window.display_size[0] * self.camera.viewport_scale[0], self.window.display_size[1] * self.camera.viewport_scale[1]]
 
         # render all objects
         for i in range(self.draw_calls):
-            surface, location = self._draw_calls.pop()
+            surface, location = self._draw_calls.pop(0)
             self.window.blit(surface, location)
         self.draw_calls = 0
 
@@ -297,7 +306,7 @@ class Renderer:
         # apply camera transformations at the display level (no per-object transformations)
         self.window.window.blit(
             pg.transform.scale(self.window.display, display_size),
-            [-self.camera.location[0] * scale_x, -self.camera.location[1] * scale_y]
+            [-self.camera.location[0] * self.camera.viewport_scale[0], -self.camera.location[1] * self.camera.viewport_scale[1]]
         )
         pg.display.flip()
 
@@ -316,7 +325,7 @@ class Renderer:
 
         # render all objects relative to the camera's position
         for i in range(self.draw_calls):
-            surface, location = self._draw_calls.pop()
+            surface, location = self._draw_calls.pop(0)
             viewport.blit(surface, (location[0] - self.camera.location[0], location[1] - self.camera.location[1]))
         self.draw_calls = 0
 
@@ -334,4 +343,11 @@ class Renderer:
         scaled_surface = pg.transform.scale(viewport, self.window.size)
         self.window.window.blit(scaled_surface, (0, 0))
         pg.display.flip()
+
+    def update(self) -> None:
+        """ Updates the renderer, dynamically swapping between large-world rendering and small world rendering based on view scale.
+            - (zoom effects are applied via Camera.mod_viewport() calls which require more of the world to be rendered)
+        """
+        if any(map(lambda s: s >= 0.4, self.camera.viewport_scale)): self.renderLW()
+        else: self.renderSW()
 # ------------------------------------------------------------ #

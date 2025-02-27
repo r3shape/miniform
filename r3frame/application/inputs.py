@@ -161,7 +161,7 @@ class Mouse:
     WheelDown = 5
 
     def rel_location() -> list:
-        return pg.mouse.get_rel()
+        return [*pg.mouse.get_rel()]
     
     def get_location() -> list:
-        return pg.mouse.get_pos()
+        return [*pg.mouse.get_pos()]

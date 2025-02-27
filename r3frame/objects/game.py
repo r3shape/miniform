@@ -8,6 +8,7 @@ class Game_Object():
         self.image = pg.Surface(size)
         self.image.fill(color)
         self.location = location
+        self.last_location = location
         self.velocity = [0.0, 0.0]
         
     def get_rect(self) -> pg.Rect: return pg.Rect(self.location, self.size)
@@ -25,6 +26,7 @@ class Game_Object():
 
     def update(self, delta_time: float) -> None:
         # Apply movement
+        self.last_location = self.location
         self.location[0] += self.velocity[0] * delta_time
         self.location[1] += self.velocity[1] * delta_time
         self.velocity = [*map(lambda v: damp_lin(v, 100, 1, delta_time), self.velocity)]

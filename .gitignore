@@ -1,4 +1,9 @@
-test.py
+*.bat
+*dist/
 *tests/
 *assets/
 *__pycache__/
+*.egg-info/
+
+test.py
+setup.py
