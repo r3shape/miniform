@@ -1,6 +1,5 @@
 import r3frame as frame
 import random
-import os
 
 def playground():
     zoom_factor = 3
@@ -15,7 +14,15 @@ def playground():
         f"r3frame {frame.version.R3FRAME_YEAR}.{frame.version.R3FRAME_MINOR}.{frame.version.R3FRAME_PATCH}",
         window, [100, 100], [0, 0], frame.utils._asset_path("fonts/megamax.ttf"), text_size=20)
 
-    player = frame.objects.game.Game_Object(location=[100, 100], color=[0, 0, 255])
+    assets.load_image_sheet("run", frame.utils._asset_path("images/run.png"), [32, 32])
+    assets.load_image_sheet("idle", frame.utils._asset_path("images/idle.png"), [32, 32])
+
+    player = frame.objects.game.Game_Object(
+        mass=500, speed=150,
+        location=[100, 100], color=[0, 0, 255],
+    )
+    player.set_animation("idle", assets.get_image("idle"), frame_duration=4)
+    player.set_animation("run", assets.get_image("run"), frame_duration=5)
 
     while not events.quit:
         clock.update()
@@ -26,15 +33,16 @@ def playground():
         if events.key_pressed(frame.app.inputs.Keyboard.F1): renderer.set_flag(renderer.FLAGS.SHOW_CAMERA)
         if events.key_pressed(frame.app.inputs.Keyboard.F2): renderer.rem_flag(renderer.FLAGS.SHOW_CAMERA)
 
-        if events.key_held(frame.app.inputs.Keyboard.S):       player.set_velocity(vy=200)
-        if events.key_held(frame.app.inputs.Keyboard.D):       player.set_velocity(vx=200)
-        if events.key_held(frame.app.inputs.Keyboard.A):       player.set_velocity(vx=-200)
-        if events.key_held(frame.app.inputs.Keyboard.W):       player.set_velocity(vy=-200)
-        
-        if events.key_held(frame.app.inputs.Keyboard.Down):    camera.set_velocity(vy=200)
-        if events.key_held(frame.app.inputs.Keyboard.Right):   camera.set_velocity(vx=200)
-        if events.key_held(frame.app.inputs.Keyboard.Left):    camera.set_velocity(vx=-200)
-        if events.key_held(frame.app.inputs.Keyboard.Up):      camera.set_velocity(vy=-200)
+        if events.key_held(frame.app.inputs.Keyboard.Down):    camera.set_velocity(vy=player.speed)
+        if events.key_held(frame.app.inputs.Keyboard.Right):   camera.set_velocity(vx=player.speed)
+        if events.key_held(frame.app.inputs.Keyboard.Left):    camera.set_velocity(vx=-player.speed)
+        if events.key_held(frame.app.inputs.Keyboard.Up):      camera.set_velocity(vy=-player.speed)
+
+        if events.mouse_wheel_up:
+            camera.mod_viewport(-zoom_factor)
+
+        if events.mouse_wheel_down:
+            camera.mod_viewport(zoom_factor)
 
         if events.mouse_held(frame.app.inputs.Mouse.LeftClick):
             mouse_location = frame.app.inputs.Mouse.get_location()
@@ -54,11 +62,19 @@ def playground():
                     o.color = [255, 255, 255]
                     o.set_image(None)
 
-        if events.mouse_wheel_up:
-            camera.mod_viewport(-zoom_factor)
-
-        if events.mouse_wheel_down:
-            camera.mod_viewport(zoom_factor)
+        if events.key_held(frame.app.inputs.Keyboard.S):       player.set_velocity(vy=player.speed)
+        if events.key_held(frame.app.inputs.Keyboard.W):       player.set_velocity(vy=-player.speed)
+        if events.key_held(frame.app.inputs.Keyboard.D):
+            player.animation.flip_x =False
+            player.set_velocity(vx=player.speed)
+        if events.key_held(frame.app.inputs.Keyboard.A):
+            player.animation.flip_x = True
+            player.set_velocity(vx=-player.speed)
+        
+        if player.velocity[0] != 0 or player.velocity[1] != 0:
+            player.set_action("run")
+        else:
+            player.set_action("idle")
 
         player.update(clock.delta)
         for tile in gridmap.cells:
@@ -72,6 +88,7 @@ def playground():
 
         dev.set_text_field("FPS", f"{clock.FPS:0.1f}", color=[0, 255, 0] if clock.FPS > clock.maxFPS/2 else [255, 0, 0])
         dev.set_text_field("OBJECTS", f"{len([*gridmap.cells, player])}")
+        dev.set_text_field("DIRECTION", f"{player.get_facing()}")
         dev.set_text_field("VELOCITY", f"{player.velocity[0]:0.1f}, {player.velocity[1]:0.1f}")
         dev.set_text_field("LOCATION", f"{player.location[0]:0.1f}, {player.location[1]:0.1f}")
         dev.render()

@@ -85,6 +85,15 @@ class Asset_Manager:
         self.scale_surface = lambda surface, scale: pg.transform.scale(surface, scale)
         self.rotate_surface = lambda surface, angle: pg.transform.rotate(surface, angle)
 
+    def flip_image(self, key: str, x: bool, y: bool) -> None:
+        try:
+            image = self.image[key]
+            if isinstance(image, pg.Surface):
+                self.image[key] = self.flip_surface(image, x, y)
+            elif isinstance(image, list):
+                self.image[key] = [self.flip_surface(i, x, y) for i in image]
+        except (KeyError) as err: print(err)
+
     def get_image(self, key:str) -> pg.Surface|pg.Surface:
         return self.image.get(key, None)
     
@@ -116,9 +125,9 @@ class Asset_Manager:
             return self.image[key]
         except (FileNotFoundError) as err: ...
     
-    def load_image_sheet(self, key:str, path:str, frameSize:int, colorKey:list=None) -> list:
+    def load_image_sheet(self, key: str, path: str, frameSize: list[int], colorKey: list=None) -> list:
         try:
-            sheet = self.load_image(path)
+            sheet = self.load_image(key, path)
             frame_x = int(sheet.get_size()[0] / frameSize[0])
             frame_y = int(sheet.get_size()[1] / frameSize[1])
             
