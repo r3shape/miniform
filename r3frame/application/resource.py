@@ -367,9 +367,9 @@ class DevDisplay:
         self.text_color: list[int] = text_color
         self.font: pg.Font = pg.Font(font_path, text_size)
 
-    def set_text_field(self, field: str, text: str) -> bool:
+    def set_text_field(self, field: str, text: str, color: list[int]=None) -> bool:
         try:
-            self.text_fields[field] = text
+            self.text_fields[field] = {"text": text, "color": color}
             return True
         except KeyError as e:
             print(f"DevDisplay TextField Not Found: {field}")
@@ -386,8 +386,9 @@ class DevDisplay:
     def render(self) -> None:
         self.window.window.blit(self.font.render(self.name, True, self.text_color), self.location)
         for index, field in enumerate(self.text_fields.keys()):
-            text = f"{field}: {self.text_fields[field]}"
-            text_surface = self.font.render(text, True, self.text_color)
+            text = f"{field}: {self.text_fields[field]["text"]}"
+            color = self.text_fields[field]["color"]
+            text_surface = self.font.render(text, True, self.text_color if not color else color)
             text_location = [
                 self.location[0],
                 self.location[1] + (text_surface.get_size()[1] * (index + 1))

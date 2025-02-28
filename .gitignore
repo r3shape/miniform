@@ -1,7 +1,6 @@
 *.bat
 *dist/
 *tests/
-*assets/
 *__pycache__/
 *.egg-info/
 

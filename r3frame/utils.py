@@ -1,4 +1,4 @@
-import math
+import os, math
 
 sine_wave_value = lambda A, B, t, C, D: int(A * math.sin((B * t) + C) + D)
 """
@@ -48,3 +48,7 @@ This function simulates a linear friction effect by reducing `x` by a constant a
 - Good for simulating dry friction, velocity decay, or gradual slowdowns.
 - Ensures the value stops completely when it gets close to 0.
 """
+
+def _asset_path(path: str) -> str:
+    path = path.replace("/", os.sep).replace("\\", os.sep)
+    return f"{__file__.removesuffix("utils.py")}assets{os.sep}{path}"

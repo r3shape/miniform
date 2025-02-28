@@ -1,0 +1,80 @@
+import r3frame as frame
+import random
+import os
+
+def playground():
+    zoom_factor = 3
+    gridmap = frame.objects.gridmap.Grid_Map(175, 175, 64)
+    clock = frame.app.resource.Clock()
+    events = frame.app.events.Event_Manager()
+    assets = frame.app.resource.Asset_Manager()
+    window = frame.app.resource.Window([800, 600], gridmap.size)
+    camera = frame.app.resource.Camera(window)
+    renderer = frame.app.resource.Renderer(camera)
+    dev = frame.app.resource.DevDisplay(
+        f"r3frame {frame.version.R3FRAME_YEAR}.{frame.version.R3FRAME_MINOR}.{frame.version.R3FRAME_PATCH}",
+        window, [100, 100], [0, 0], frame.utils._asset_path("fonts/megamax.ttf"), text_size=20)
+
+    player = frame.objects.game.Game_Object(location=[100, 100], color=[0, 0, 255])
+
+    while not events.quit:
+        clock.update()
+        events.update()
+
+        if events.key_pressed(frame.app.inputs.Keyboard.Escape): events.quit = 1
+
+        if events.key_pressed(frame.app.inputs.Keyboard.F1): renderer.set_flag(renderer.FLAGS.SHOW_CAMERA)
+        if events.key_pressed(frame.app.inputs.Keyboard.F2): renderer.rem_flag(renderer.FLAGS.SHOW_CAMERA)
+
+        if events.key_held(frame.app.inputs.Keyboard.S):       player.set_velocity(vy=200)
+        if events.key_held(frame.app.inputs.Keyboard.D):       player.set_velocity(vx=200)
+        if events.key_held(frame.app.inputs.Keyboard.A):       player.set_velocity(vx=-200)
+        if events.key_held(frame.app.inputs.Keyboard.W):       player.set_velocity(vy=-200)
+        
+        if events.key_held(frame.app.inputs.Keyboard.Down):    camera.set_velocity(vy=200)
+        if events.key_held(frame.app.inputs.Keyboard.Right):   camera.set_velocity(vx=200)
+        if events.key_held(frame.app.inputs.Keyboard.Left):    camera.set_velocity(vx=-200)
+        if events.key_held(frame.app.inputs.Keyboard.Up):      camera.set_velocity(vy=-200)
+
+        if events.mouse_held(frame.app.inputs.Mouse.LeftClick):
+            mouse_location = frame.app.inputs.Mouse.get_location()
+            world_x = (mouse_location[0] / camera.viewport_scale[0] + camera.location[0])
+            world_y = (mouse_location[1] / camera.viewport_scale[1] + camera.location[1])
+            gridmap.set_cell(world_x, world_y, frame.objects.game.Game_Object(
+                size=[gridmap.cell_size, gridmap.cell_size],
+                color=[random.randint(1, 255), random.randint(1, 255), random.randint(1, 255)]
+            ))
+
+        if events.mouse_pressed(frame.app.inputs.Mouse.RightClick):
+            mouse_location = frame.app.inputs.Mouse.get_location()
+            world_x = (mouse_location[0] / camera.viewport_scale[0] + camera.location[0])
+            world_y = (mouse_location[1] / camera.viewport_scale[1] + camera.location[1])
+            for o in gridmap.get_region(world_x, world_y).values():
+                if o:
+                    o.color = [255, 255, 255]
+                    o.set_image(None)
+
+        if events.mouse_wheel_up:
+            camera.mod_viewport(-zoom_factor)
+
+        if events.mouse_wheel_down:
+            camera.mod_viewport(zoom_factor)
+
+        player.update(clock.delta)
+        for tile in gridmap.cells:
+            if hasattr(tile, "update"): tile.update(clock.delta)
+
+        camera.center_on(player.size, player.location)
+        camera.update(clock.delta)
+        
+        [renderer.draw_call(obj.image, obj.location) for obj in [*gridmap.cells.values(), player] if hasattr(obj, "image")]
+        renderer.update()
+
+        dev.set_text_field("FPS", f"{clock.FPS:0.1f}", color=[0, 255, 0] if clock.FPS > clock.maxFPS/2 else [255, 0, 0])
+        dev.set_text_field("OBJECTS", f"{len([*gridmap.cells, player])}")
+        dev.set_text_field("VELOCITY", f"{player.velocity[0]:0.1f}, {player.velocity[1]:0.1f}")
+        dev.set_text_field("LOCATION", f"{player.location[0]:0.1f}, {player.location[1]:0.1f}")
+        dev.render()
+
+        window.update()           
+        clock.rest()
