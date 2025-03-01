@@ -1,25 +1,25 @@
 from r3frame.globals import pg
 
 class Event_Manager:
-    quit:bool=False
+    quit: bool=False
 
-    def __init__(self):
-        self.keyboard = {}
-        self.mouse_old = {}
-        self.keyboard_old = {}
-        self.mouse = {
-            1:False,
-            2:False,
-            3:False,
-            4:False,
-            5:False,
-            6:False,
-            7:False
-        }
-        self.mouse_wheel_up=False
-        self.mouse_wheel_down=False
-        self.mouse_location = (0,0)
+    keyboard = {}
+    mouse_old = {}
+    keyboard_old = {}
+    mouse = {
+        1:False,
+        2:False,
+        3:False,
+        4:False,
+        5:False,
+        6:False,
+        7:False
+    }
+    mouse_location = (0,0)
+    mouse_wheel_up: bool=False
+    mouse_wheel_down: bool=False
 
+    @classmethod
     def update(self) -> int:
         self.mouse_wheel_up = False
         self.mouse_wheel_down = False
@@ -44,15 +44,19 @@ class Event_Manager:
                     if event.button == 5:
                         self.mouse_wheel_down = True
 
+    @classmethod
     def key_held(self, key):
         return self.keyboard.get(key, False)
 
+    @classmethod
     def key_pressed(self, key):
         return self.keyboard.get(key, False) and not self.keyboard_old.get(key, False)
     
+    @classmethod
     def mouse_held(self, button:int):
         return self.mouse.get(button, False)
 
+    @classmethod
     def mouse_pressed(self, button):
         return self.mouse.get(button, False) and not self.mouse_old.get(button, False)
     

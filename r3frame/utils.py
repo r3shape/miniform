@@ -1,4 +1,4 @@
-import os, math
+import os, math, random
 
 sine_wave_value = lambda A, B, t, C, D: int(A * math.sin((B * t) + C) + D)
 """

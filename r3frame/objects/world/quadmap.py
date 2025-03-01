@@ -23,10 +23,16 @@ class Quad_Cell:
 
         # reassign objects to children
         for obj in self.objects:
-            self.insert(obj)
+            self.set(obj)
         self.objects.clear()  # clear from parent after distributing
 
-    def insert(self, obj: Game_Object):
+    def contains(self, location: list[int|float]):
+        """Checks if a position is inside this cell's bounds."""
+        x, y, size, _ = self.bounds
+        px, py = location
+        return x <= px < x + size and y <= py < y + size
+    
+    def set(self, obj: Game_Object):
         """Inserts an object into the cell or its children."""
         x, y, size, _ = self.bounds
 
@@ -34,7 +40,7 @@ class Quad_Cell:
         if self.children:
             for child in self.children:
                 if child.contains(obj.location):
-                    child.insert(obj)
+                    child.set(obj)
                     return
 
         # otherwise, store the object here
@@ -43,12 +49,6 @@ class Quad_Cell:
         # if too many objects, subdivide
         if len(self.objects) >= self.object_max and self.depth < self.depth_max:
             if not self.children: self.subdivide()
-
-    def contains(self, location: list[int|float]):
-        """Checks if a position is inside this cell's bounds."""
-        x, y, size, _ = self.bounds
-        px, py = location
-        return x <= px < x + size and y <= py < y + size
 
     def get(self, x, y):
         """Retrieves the object at a given position."""
@@ -66,6 +66,25 @@ class Quad_Cell:
                 return obj
         return None
 
+    def rem(self, x, y):
+        """Remove and return the object from a given position."""
+        if not self.contains((x, y)):
+            return None
+
+        if self.children:
+            for child in self.children:
+                result = child.get(x, y)
+                if result is not None:
+                    child.rem(x, y)
+                    return result
+
+        for i, obj in enumerate(self.objects):
+            if obj.location == [x, y]:
+                result = obj
+                del self.objects[i]
+                return result
+        return None
+
 class Quad_Map:
     def __init__(self, width: int, height: int, cell_size: int, depth_max: int=10, object_max: int=64) -> None:
         self.objects = []                                   # an unordered list containing every object in the quadmap (used for quick loops but not for specific retrieval).
@@ -78,17 +97,28 @@ class Quad_Map:
     def set_cell(self, x: int, y: int, obj: Game_Object) -> None:
         """Places an object in the grid at the given world (pixel) position."""
         if x < 0 or x >= self.size[0] or y < 0 or y >= self.size[1]: return
+
+        gx, gy = (x // self.cell_size) * self.cell_size, (y // self.cell_size) * self.cell_size
+        if self.get_cell(gx, gy): return    # position occupied!
         
-        gx, gy = x // self.cell_size, y // self.cell_size
-        obj.location = [gx * self.cell_size, gy * self.cell_size]
+        obj.location = [gx, gy]
         
-        self.root.insert(obj)
+        self.root.set(obj)
         self.objects.append(obj)
 
     def get_cell(self, x: int, y: int) -> Game_Object | None:
         """Returns the object at the given world (pixel) position."""
         if x < 0 or x >= self.size[0] or y < 0 or y >= self.size[1]: return
-        return self.root.get(x, y)
+        gx, gy = (x // self.cell_size) * self.cell_size, (y // self.cell_size) * self.cell_size
+        return self.root.get(gx, gy)
+    
+    def rem_cell(self, x: int, y: int) -> Game_Object | None:
+        """Removes and returns the object from the map at the given world (pixel) position."""
+        if x < 0 or x >= self.size[0] or y < 0 or y >= self.size[1]: return
+        gx, gy = (x // self.cell_size) * self.cell_size, (y // self.cell_size) * self.cell_size
+        obj = self.root.rem(gx, gy)
+        if obj is not None: self.objects.remove(obj)
+        return obj
 
     def get_region(self, x: int, y: int) -> list[Game_Object]:
         """Gets the object in the given cell and its immediate neighbors."""
