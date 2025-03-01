@@ -36,6 +36,12 @@ class Window:
         self.window = pg.display.set_mode(size)
         self.display = pg.Surface(self.display_size)
 
+        self.draw_line = lambda start, end, color, width: pg.draw.line(self.display, color, start, end, width=width)
+        self.draw_rect = lambda size, location, color, width: pg.draw.rect(self.display, color, pg.Rect(location, size), width=width)
+        self.draw_circle = lambda center, radius, color, width: pg.draw.circle(self.display, color, [*map(int, center)], radius, width)
+        
+        self.blit_rect = lambda rect, color, width: self.draw_rect(rect.size, rect.topleft, color, width)
+
     def set_title(self, title: str) -> None: self.title = title
     def set_icon(self, icon: pg.Surface) -> None: self.icon = icon
 
@@ -47,24 +53,12 @@ class Window:
         self.display.fill(self.color)
         self.window.fill(self.color)
 
-    def blit_rect(self, rect: pg.Rect, color: list[int]=[255, 255, 255], width: int=1) -> None:
-        self.draw_rect(rect.size, rect.topleft, color, width)
-
     def blit(self, surface: pg.Surface, location: list[int], offset: list[int]=[0, 0]) -> None:
         # display-culling
         if ((location[0] + surface.size[0]) - self.clip_range[0] < 0 or location[0] + self.clip_range[0] > self.display_size[0]) \
         or ((location[1] + surface.size[1]) - self.clip_range[1] < 0 or location[1] + self.clip_range[1] > self.display_size[1]):
             return
         self.display.blit(surface, [location[0] - offset[0], location[1] - offset[1]])
-    
-    def draw_line(self, start: list[int|float], end: list[int|float], color: list[int]=[255, 255, 255], width: int=1) -> None :
-        pg.draw.line(self.display, color, start, end, width=width)
-        
-    def draw_rect(self, size: list[int], location: list[int|float], color: list[int]=[255, 255, 255], width: int=1) -> None :
-        pg.draw.rect(self.display, color, pg.Rect(location, size), width=width)
-
-    def draw_circle(self, center: list[int|float], radius: int, color: list[int]=[255, 255, 255], width: int=1):
-        pg.draw.circle(self.display, color, [*map(int, center)], radius, width)
 
     def update(self) -> None:
         pg.display.flip()
@@ -254,11 +248,26 @@ class Renderer:
         :param window: The game window where rendering occurs.
         :param camera: The camera that defines the viewport.
         """
-        self.window = camera.window
         self.camera = camera
+        self.window = camera.window
+        self.target = self.window.display
         self.flags = 0
         self.draw_calls = 0
         self._draw_calls = []  # draw_call layout : [surface, location]
+
+        self.draw_line = lambda start, end, color, width: pg.draw.line(
+            self.target, color,
+            [start[0] - self.camera.location[0], start[1] - self.camera.location[1]],
+            [end[0] - self.camera.location[0], end[1] - self.camera.location[1]], width=width
+        )
+
+        self.draw_rect = lambda size, location, color, width: pg.draw.rect(self.target, color, pg.Rect(
+            [location[0] - self.camera.location[0], location[1] - self.camera.last_location[1]], size), width=width)
+        
+        self.draw_circle = lambda center, radius, color, width: pg.draw.circle(
+            self.target, color, [*map(int, [center[0] - self.camera.location[0], center[1] - self.camera.location[1]])], radius, width)
+        
+        self.blit_rect = lambda rect, color, width: self.draw_rect(rect.size, [rect.topleft[0] - self.camera.location[0], rect.topleft[1] - self.camera.location[1]], color, width)
 
     def set_flag(self, flag: int) -> None:
         """Enables a rendering flag."""
@@ -268,6 +277,10 @@ class Renderer:
         """Disables a rendering flag."""
         if (self.flags & flag) == flag:
             self.flags &= ~flag
+
+    def pre_render(self) -> None: pass
+    
+    def post_render(self) -> None: pass
 
     def draw_call(self, surface: pg.Surface, location: list[int]) -> None:
         """
@@ -300,10 +313,12 @@ class Renderer:
         are applied at the display level, object positions remain true to world coordinates.
         """
         self.window.clear()
+        self.target = self.window.display
 
         # compute scaling factors based on the viewport and window size.
         display_size = [self.window.display_size[0] * self.camera.viewport_scale[0], self.window.display_size[1] * self.camera.viewport_scale[1]]
 
+        self.pre_render()
         # render all objects
         for i in range(self.draw_calls):
             surface, location = self._draw_calls.pop(0)
@@ -312,12 +327,13 @@ class Renderer:
 
         # optionally render the camera's viewport for debugging
         if (self.flags & self.FLAGS.SHOW_CAMERA):
-            self.window.blit_rect(self.camera.get_viewport(), [255, 255, 255], 1)
-            self.window.blit_rect(self.camera.get_center([10, 10]), [0, 255, 0], 1)
+            self.blit_rect(self.camera.get_viewport(), [255, 255, 255], 1)
+            self.blit_rect(self.camera.get_center([10, 10]), [0, 255, 0], 1)
 
+        self.post_render()
         # apply camera transformations at the display level (no per-object transformations)
         self.window.window.blit(
-            pg.transform.scale(self.window.display, display_size),
+            pg.transform.scale(self.target, display_size),
             [-self.camera.location[0] * self.camera.viewport_scale[0], -self.camera.location[1] * self.camera.viewport_scale[1]]
         )
 
@@ -330,14 +346,15 @@ class Renderer:
         transformations are applied per-object within the viewport, their positions are offset 
         relative to the camera's location.
         """
-        viewport = pg.Surface(self.camera.viewport_size)  # create a surface matching the viewport size.
-        viewport.fill(self.window.color)
         self.window.clear()
+        self.target = pg.Surface(self.camera.viewport_size)  # create a surface matching the viewport size.
+        self.target.fill(self.window.color)
 
-        # render all objects relative to the camera's position
+        self.pre_render()
+        # apply camera transformations on per-object basis (no display transformation)
         for i in range(self.draw_calls):
             surface, location = self._draw_calls.pop(0)
-            viewport.blit(surface, (location[0] - self.camera.location[0], location[1] - self.camera.location[1]))
+            self.target.blit(surface, (location[0] - self.camera.location[0], location[1] - self.camera.location[1]))
         self.draw_calls = 0
 
         if (self.flags & self.FLAGS.SHOW_CAMERA):
@@ -347,15 +364,17 @@ class Renderer:
             center_rect = self.camera.get_center([10, 10])
             center_rect.topleft = (center_rect.x - self.camera.location[0], center_rect.y - self.camera.location[1])
 
-            pg.draw.rect(viewport, [255, 255, 255], viewport_rect, 1)
-            pg.draw.rect(viewport, [0, 255, 0], center_rect, 1)
+            pg.draw.rect(self.target, [255, 255, 255], viewport_rect, 1)
+            pg.draw.rect(self.target, [0, 255, 0], center_rect, 1)
 
-        # scale the viewport to match the full window size before displaying
-        scaled_surface = pg.transform.scale(viewport, self.window.size)
-        self.window.window.blit(scaled_surface, (0, 0))
+        self.post_render()
+        self.window.window.blit(
+            pg.transform.scale(self.target, self.window.size),
+            [0, 0]
+        )
 
-    def update(self) -> None:
-        """ Updates the renderer, dynamically swapping between large-world rendering and small world rendering based on view scale.
+    def flush(self) -> None:
+        """ Flushes the renderer draw call array, dynamically swapping between large-world rendering and small-world rendering based on view scale.
             - (zoom effects are applied via Camera.mod_viewport() calls which require more of the world to be rendered)
         """
         if any(map(lambda s: s >= 0.4, self.camera.viewport_scale)): self.renderLW()

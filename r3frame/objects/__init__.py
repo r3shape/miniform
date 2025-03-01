@@ -1,2 +1,3 @@
-import r3frame.objects.game as game
-import r3frame.objects.gridmap as gridmap
+from r3frame.objects.gridmap import Grid_Map
+from r3frame.objects.quadmap import Quad_Map
+from r3frame.objects.game import Animation, Game_Object
