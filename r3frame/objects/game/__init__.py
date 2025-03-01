@@ -1,36 +1,8 @@
 from r3frame.globals import pg
 from r3frame.utils import damp_lin
 
-# ------------------------------------------------------------ #
-class Animation:
-    def __init__(self, frames: list[pg.Surface], loop: bool=1, frame_duration: float=5.0, frame_offset: list[int]=[0, 0]) -> None:
-        self.done = 0
-        self.frame = 0
-        self.loop = loop
-        self.flip_x = False
-        self.flip_y = False
-        self.frames = frames
-        self.frame_offset = frame_offset
-        self.frame_duration = frame_duration
+from r3frame.objects.game.animation import Animation
 
-    def reset(self) -> None: self.frame, self.done = 0, 0
-
-    def copy(self):
-        return Animation(self.frames, self.loop, self.frame_duration, self.frame_offset)
-
-    def get_frame(self):
-        return pg.transform.flip(self.frames[int(self.frame / self.frame_duration)], self.flip_x, self.flip_y)
-
-    def update(self) -> None:
-        if self.loop:
-            self.frame = (self.frame + 1) % (self.frame_duration * len(self.frames))
-        else:
-            self.frame = min(self.frame + 1, self.frame_duration * len(self.frames) - 1)
-            if self.frame >= self.frame_duration * len(self.frames) - 1:
-                self.done = 1
-# ------------------------------------------------------------ #
-
-# ------------------------------------------------------------ #
 class Game_Object:
     def __init__(self, size: list[int]=[32, 32], color: list[int]=[0, 255, 0], location: list[int]=[0, 0], mass: float=100.0, speed: float=100.0, vthreshold: float=5.0):
         self.size = size
@@ -109,4 +81,3 @@ class Game_Object:
         if self.animation:
             self.animation.update()
             self.image = self.animation.get_frame()
-# ------------------------------------------------------------ #

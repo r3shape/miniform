@@ -160,6 +160,8 @@ class Mouse:
     WheelUp = 4
     WheelDown = 5
 
+    Hovering = None
+
     def rel_location() -> list:
         return [*pg.mouse.get_rel()]
     
