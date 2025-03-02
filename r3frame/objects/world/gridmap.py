@@ -73,16 +73,16 @@ class Grid_Map:
 
         return region
 
-    def render_debug(self, renderer, center_x: int=0, center_y: int=0, radius: int=8):
+    def debug_render(self, renderer, center: list[int|float], radius: int=8):
         """Renders a portion of the grid around a center position within a given radius."""
         cell_w, cell_h = self.cell_size, self.cell_size
         radius_px = radius * cell_w  # convert radius from cells to pixels
 
         # convert world position to grid cell indices
-        start_x = max((center_x - radius_px) // cell_w, 0)
-        start_y = max((center_y - radius_px) // cell_h, 0)
-        end_x = min((center_x + radius_px) // cell_w, self.width - 1)
-        end_y = min((center_y + radius_px) // cell_h, self.height - 1)
+        start_x = max((int(center[0]) - radius_px) // cell_w, 0)
+        start_y = max((int(center[1]) - radius_px) // cell_h, 0)
+        end_x = min((int(center[0]) + radius_px) // cell_w, self.width - 1)
+        end_y = min((int(center[1]) + radius_px) // cell_h, self.height - 1)
 
         # draw grid lines within the region
         for gx in range(start_x, end_x + 1):

@@ -1,2 +1,1 @@
-import r3frame.scripts.playground_quad as playground_quad
-import r3frame.scripts.playground_fixed as playground_fixed
+import r3frame.scripts.playground as playground

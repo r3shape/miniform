@@ -169,7 +169,7 @@ class Quad_Map:
         _query(self.root)
         return region
 
-    def render_debug(self, renderer):
+    def debug_render(self, renderer):
         """Visualizes the quadtree by drawing its regions."""
         self._draw_cell(self.root, renderer)
 

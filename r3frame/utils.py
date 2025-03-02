@@ -52,3 +52,22 @@ This function simulates a linear friction effect by reducing `x` by a constant a
 def _asset_path(path: str) -> str:
     path = path.replace("/", os.sep).replace("\\", os.sep)
     return f"{__file__.removesuffix("utils.py")}assets{os.sep}{path}"
+
+def point_inside(point: list[int|float], bounds: list[int|float]) -> bool:
+    return \
+        point[0] > bounds[0] and point[0] < bounds[0] + bounds[2] \
+    and point[1] > bounds[1] and point[1] < bounds[1] + bounds[3]
+
+def dist_to(from_point: list[int|float], to_point: list[int|float]) -> list[float]:
+    """Calculates a distance vector from two points."""
+    return [
+        to_point[0] - from_point[0],
+        to_point[1] - from_point[1]
+    ]
+
+def angle_to(from_point: list[int|float], to_point: list[int|float]) -> float:
+    """Calculates the angle (in degrees) between two points."""
+    return math.degrees(math.atan2(*[
+        to_point[0] - from_point[0],
+        to_point[1] - from_point[1]
+    ])) 

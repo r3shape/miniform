@@ -11,19 +11,16 @@ class Scene:
         
         self.assets = Asset_Manager()
         
+        self.interfaces = {}
         self.window = Window(window_size, partition.size)
         pg.display.set_caption(name)
         pg.display.set_icon(pg.image.load(_asset_path("images/r3-logo.ico")))
 
+        self.partition = partition
         self.camera = Camera(self.window)
         self.renderer = Renderer(self.camera)
-        self.interfaces = {}
-        self.partition = partition
 
-    def set_object(self, size: list[int], location: list[int|float], color: list[int]) -> Game_Object|None:
-        obj = Game_Object(size, color, location)
-        self.partition.set_cell(*location, obj)
-        return obj
+    def set_object(self, obj: Game_Object) -> None: self.partition.set_cell(*obj.location, obj)
     def get_object(self, location: list[int|float]) -> None: return self.partition.get_cell(*location)
     def rem_object(self, location: list[int|float]) -> Game_Object|None: return self.partition.rem_cell(*location)
 
@@ -32,9 +29,9 @@ class Scene:
     def get_interface(self, key: str) -> Interface|None: return self.interfaces.get(key, None)
     def set_interface(self, interface: Interface) -> None: self.interfaces[interface.name] = interface
 
-    def handle_update(self) -> None:
+    def handle_update(self, event_manager) -> None:
         for interface in self.interfaces:
-            self.interfaces[interface].update()
+            self.interfaces[interface].update(event_manager)
     
     def handle_render(self) -> None:
         for interface in self.interfaces:
