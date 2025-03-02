@@ -40,6 +40,7 @@ class Quad_Cell:
         if self.children:
             for child in self.children:
                 if child.contains(obj.location):
+                    # self.objects.remove(obj) ? 
                     child.set(obj)
                     return
 

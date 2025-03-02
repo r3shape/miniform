@@ -7,11 +7,12 @@ class Button:
             color: list[int]=[0, 0, 0], text_color:list[int]=[255, 255, 255], text_size: int=18, padding: list[int]=[0, 0],
             border_size: list[int]=[5, 5], border_radius: list[int]=[0, 0, 0, 0], border_color: list[int]=[255, 255, 255],
         ) -> None:
-        self.image = pg.Surface(size)
+        self.hovered = False
 
         self.size = size
         self.color = color
         self.location = location
+        self.image = pg.Surface(size)
 
         self.border_size = border_size
         self.border_radius = border_radius

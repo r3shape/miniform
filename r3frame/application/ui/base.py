@@ -1,4 +1,5 @@
 from r3frame.globals import pg
+from r3frame.utils import point_inside
 from r3frame.application.inputs import Mouse
 from r3frame.application.resource import Window
 from r3frame.application.ui.button import Button
@@ -24,6 +25,8 @@ class Interface:
         self.text_color: list[int] = text_color
         self.title_color: list[int] = title_color
         self.font: pg.Font = pg.Font(font_path, text_size)
+
+        self.show_name = True
 
     def set_button(
             self, key: str, text: str="Button",
@@ -61,7 +64,9 @@ class Interface:
     def render(self) -> None:
         for button in self.buttons.values():
             button.render(self.window.window)
-        self.window.window.blit(self.font.render(self.name, True, self.title_color), self.location)
+        
+        if self.show_name: self.window.window.blit(self.font.render(self.name, True, self.title_color), self.location)
+        
         for index, field in enumerate(self.text_fields.keys()):
             text = f"{field}: {self.text_fields[field]["text"]}"
             color = self.text_fields[field]["color"]
@@ -73,17 +78,15 @@ class Interface:
             self.window.window.blit(text_surface, text_location)
 
     def update(self, event_manager) -> None:
-        if isinstance(Mouse.Hovering, Button) and event_manager.mouse_pressed(Mouse.LeftClick):
-                Mouse.Hovering.on_click()
         for button in self.buttons.values():
             mouse_location = Mouse.get_location()
-            if Mouse.Hovering == button and \
-                   mouse_location[0] < button.location[0] or mouse_location[0] > button.location[0] + button.size[0]\
-                or mouse_location[1] < button.location[1] or mouse_location[1] > button.location[1] + button.size[1]:
-                    Mouse.Hovering = None
-                    button.on_unhover()
-            elif Mouse.Hovering != button and\
-                mouse_location[0] >= button.location[0] and mouse_location[0] <= button.location[0] + button.size[0]\
-            and mouse_location[1] >= button.location[1] and mouse_location[1] <= button.location[1] + button.size[1]:
+            if not button.hovered and point_inside(mouse_location, [*button.location, *button.size]):
                 Mouse.Hovering = button
+                button.hovered = True
                 button.on_hover()
+            if button.hovered and not point_inside(mouse_location, [*button.location, *button.size]):
+                Mouse.Hovering = None
+                button.hovered = False
+                button.on_unhover()
+            if button.hovered and event_manager.mouse_pressed(Mouse.LeftClick):
+                button.on_click()

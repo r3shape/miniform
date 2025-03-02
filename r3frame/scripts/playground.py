@@ -15,13 +15,15 @@ class Playground(r3.app.Application):
         self.set_scene(r3.app.scene.Scene("r3 playground", [800, 600], r3.objects.world.Grid_Map(150, 150, 16)))
         
         self.active_scene.set_interface(r3.app.ui.Interface("Debug", self.active_scene.window, [100, 100], [0, 0], r3.utils._asset_path("fonts/megamax.ttf")))
+        self.active_scene.set_interface(r3.app.ui.Interface("Buttons", self.active_scene.window, [200, 50], [5, 550], r3.utils._asset_path("fonts/megamax.ttf")))
+        self.active_scene.set_interface(r3.app.ui.Interface("Controls", self.active_scene.window, [200, 50], [600, 5], r3.utils._asset_path("fonts/megamax.ttf")))
         
-        self.active_scene.set_interface(r3.app.ui.Interface("Controls", self.active_scene.window, [200, 50], [5, 550], r3.utils._asset_path("fonts/megamax.ttf")))
-        
-        for i in range(4):
-            self.active_scene.get_interface("Controls").set_button(f"button-{i+1}", f"Hello{i+1}!", [200, 50], location=[205 * i, 550], padding=[65, 16], text_size=16)
+        for i in range(2):
+            text = ["Hello!", "Debug"]
+            self.active_scene.get_interface("Buttons").set_button(f"button-{i+1}", text[i], [200, 50], location=[205 * i, 550], padding=[65, 16], text_size=16)
 
-        button_1 = self.active_scene.get_interface("Controls").get_button("button-1")
+        self.active_scene.get_interface("Buttons").show_name = False
+        button_1 = self.active_scene.get_interface("Buttons").get_button("button-1")
         def on_click() -> None:
             button_1.text = random.choice(["Just Wow!", "Help Me!", "Hahaha!", "Not Funny!", "The Colors!", "Ouch!", "The Pain!", "r3frame!", "I Get It!", "OK!"])
             button_1.border_color = button_1.text_color = [
@@ -41,6 +43,22 @@ class Playground(r3.app.Application):
         button_1.on_click = on_click
         button_1.on_hover = on_hover
         button_1.on_unhover = on_unhover
+        
+        self.debug_mode = False
+        button_2 = self.active_scene.get_interface("Buttons").get_button("button-2")
+        button_2.text_color = [255, 0, 0] if not self.debug_mode else [0, 255, 0]
+        button_2.border_color = [255, 0, 0] if not self.debug_mode else [0, 255, 0]
+        def on_click2() -> None:
+            self.debug_mode = not self.debug_mode
+            button_2.text_color = [255, 0, 0] if not self.debug_mode else [0, 255, 0]
+            button_2.border_color = [255, 0, 0] if not self.debug_mode else [0, 255, 0]
+        def on_hover2() -> None:
+            button_2.border_color = [255, 255, 255]
+        def on_unhover2() -> None:
+            button_2.border_color = [255, 0, 0] if not self.debug_mode else [0, 255, 0]
+        button_2.on_click = on_click2
+        button_2.on_hover = on_hover2
+        button_2.on_unhover = on_unhover2
     
     def load_objects(self) -> None:
         self.player = r3.objects.game.Game_Object(
@@ -57,7 +75,6 @@ class Playground(r3.app.Application):
         self.chain.get_scaling = lambda index, parent, link: 20
         self.chain.grabbed = False
 
-        self.debug_mode = False
         def post_render():
             if self.debug_mode:
                 self.active_scene.get_interface("Debug").name = "Debug - Active"
@@ -85,13 +102,6 @@ class Playground(r3.app.Application):
         zoom_factor = 3
 
         if self.events.key_pressed(r3.app.inputs.Keyboard.Escape): self.events.quit = 1
-
-        if self.events.key_pressed(r3.app.inputs.Keyboard.F1): self.debug_mode = not self.debug_mode
-
-        if self.events.key_held(r3.app.inputs.Keyboard.Down):    self.active_scene.camera.set_velocity(vy=self.player.speed)
-        if self.events.key_held(r3.app.inputs.Keyboard.Right):   self.active_scene.camera.set_velocity(vx=self.player.speed)
-        if self.events.key_held(r3.app.inputs.Keyboard.Left):    self.active_scene.camera.set_velocity(vx=-self.player.speed)
-        if self.events.key_held(r3.app.inputs.Keyboard.Up):      self.active_scene.camera.set_velocity(vy=-self.player.speed)
 
         if self.events.mouse_wheel_up:
             self.active_scene.camera.mod_viewport(-zoom_factor)
@@ -122,10 +132,7 @@ class Playground(r3.app.Application):
             mouse_location = r3.app.inputs.Mouse.get_location()
             world_x = (mouse_location[0] / self.active_scene.camera.viewport_scale[0] + self.active_scene.camera.location[0])
             world_y = (mouse_location[1] / self.active_scene.camera.viewport_scale[1] + self.active_scene.camera.location[1])
-            for o in self.active_scene.partition.query_region(world_x, world_y, 1).values():
-                if o:
-                    self.active_scene.renderer.draw_rect(o.size, o.location, [0, 255, 0], 5)
-                    self.active_scene.partition.rem_cell(*o.location)
+            self.active_scene.partition.rem_cell(world_x, world_y)
 
         if self.events.key_held(r3.app.inputs.Keyboard.W):       self.player.set_velocity(vy=-self.player.speed)
         if self.events.key_held(r3.app.inputs.Keyboard.S):       self.player.set_velocity(vy=self.player.speed)
@@ -157,5 +164,12 @@ class Playground(r3.app.Application):
 
     def handle_render(self) -> None:
         [self.active_scene.renderer.draw_call(o.image, o.location) for o in [*self.active_scene.partition.cells.values(), self.player, *self.chain.get_objects()]]
+        self.active_scene.get_interface("Controls").set_text_field("Up", "W", [200, 200, 200])
+        self.active_scene.get_interface("Controls").set_text_field("Down", "S", [200, 200, 200])
+        self.active_scene.get_interface("Controls").set_text_field("Left", "A", [200, 200, 200])
+        self.active_scene.get_interface("Controls").set_text_field("Right", "D", [200, 200, 200])
+        self.active_scene.get_interface("Controls").set_text_field("Interact", "E", [200, 200, 200])
+        self.active_scene.get_interface("Controls").set_text_field("Place", "L-Click", [200, 200, 200])
+        self.active_scene.get_interface("Controls").set_text_field("Remove", "R-Click", [200, 200, 200])
         
 def playground(): Playground().run()
