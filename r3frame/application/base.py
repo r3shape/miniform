@@ -1,18 +1,29 @@
+from r3frame.globals import pg
+from r3frame.utils import _asset_path
 from r3frame.application.ui import Button
 from r3frame.application.scene import Scene
 from r3frame.application.events import Event_Manager
 from r3frame.application.inputs import Keyboard, Mouse, Action_Map
-from r3frame.application.resource import Clock, Window, Camera, Renderer
+from r3frame.application.resource import Clock, Window, Camera, Renderer, Asset_Manager
 
 class Application:
-    def __init__(self, name: str="My App") -> None:
+    def __init__(self, name: str="My App", window_size: list[int]=[800, 600]) -> None:
         self.name = name
         self.clock = Clock()
+        self.assets = Asset_Manager()
         self.events = Event_Manager()
 
         self.scene: str = None
         self.active_scene: Scene = None
         self.scenes: dict[str, Scene] = {}
+
+        self.window = Window(window_size, window_size)
+        self.window.title = name
+        self.window.icon = pg.image.load(_asset_path("images/r3-logo.ico"))
+        self.window.configure()
+
+        self.camera = Camera(self.window)
+        self.renderer = Renderer(self.camera)
 
     def set_scene(self, scene: Scene) -> None:
         self.scenes[scene.name] = scene
@@ -44,14 +55,18 @@ class Application:
             self.handle_events()
 
             self.handle_update()
-            if self.scene is not None:
-                self.scenes[self.scene].camera.update(self.clock.delta)
+            if self.active_scene:
                 self.scenes[self.scene].handle_update(self.events)
+                for interface in self.active_scene.interfaces:
+                    self.active_scene.interfaces[interface].update(self.events)
+            self.camera.update(self.clock.delta)
 
             self.handle_render()
-            if self.scene is not None:
-                self.scenes[self.scene].renderer.flush()
+            self.renderer.flush()
+            if self.active_scene:
                 self.scenes[self.scene].handle_render()
-                self.scenes[self.scene].window.update()
+                for interface in self.active_scene.interfaces:
+                    self.active_scene.interfaces[interface].render()
 
+            self.window.update()
             self.clock.rest()

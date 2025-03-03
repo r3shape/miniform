@@ -46,6 +46,7 @@ class Window:
     def set_icon(self, icon: pg.Surface) -> None: self.icon = icon
 
     def configure(self) -> None:
+        self.display = pg.Surface(self.display_size)
         if isinstance(self.title, str): pg.display.set_caption(self.title)
         if isinstance(self.icon, pg.Surface): pg.display.set_icon(self.icon)
 
@@ -163,16 +164,18 @@ class Camera:
         self.mode = 0
         self.drag = 18
         self.speed = 100
+        self.location = [0, 0]
         self.velocity = [0.0, 0.0]
+        self.last_location = self.location
+
         self.bounds = window.display_size
-        self.location = [self.bounds[0] / 2, self.bounds[1] / 2]
-        self.viewport_size = [self.bounds[0] / 2, self.bounds[1] / 2]
+        self.viewport_size = window.display_size
         self.viewport_scale = [
             self.window.size[0] / self.viewport_size[0],
             self.window.size[1] / self.viewport_size[1]
         ]
-        self.last_location = self.location
         self.center = [self.location[0] + self.viewport_size[0] / 2, self.location[1] + self.viewport_size[1] / 2]
+        self.mod_viewport(-self.viewport_size[0] - self.viewport_size[1])
 
     def get_center(self, size: list[int]) -> pg.Rect:
         return pg.Rect([self.center[0] - size[0] / 2, self.center[1] - size[1] / 2], size)
