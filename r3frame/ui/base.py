@@ -1,9 +1,9 @@
-from r3frame.globals import pg
-from r3frame.utils import point_inside
-from r3frame.application.inputs import Mouse
-from r3frame.application.resource import Window
-from r3frame.application.ui.button import Button
-from r3frame.application.ui.tooltip import Tooltip
+from r3frame.globs import pg
+from r3frame.input import Mouse
+from r3frame.rsrc import Window
+from r3frame.util import point_inside
+from r3frame.ui.button import Button
+from r3frame.ui.tooltip import Tooltip
 
 class Interface:
     def __init__(
@@ -29,17 +29,24 @@ class Interface:
         self.font: pg.Font = pg.Font(font_path, text_size)
 
         self.show_name = True
+        self.display = pg.Surface(size)
 
-    def set_button(self, key: str, button: Button) -> None: self.buttons[key] = button
+    def set_button(self, key: str, button: Button) -> None:
+        self.buttons[key] = button
+    
     def get_button(self, key: str) -> Button|None:
         return self.buttons.get(key, None)
+    
     def rem_button(self, key: str) -> Button|None:
         if self.get_button(key) is not None:
             del self.buttons[key]
 
-    def set_tooltip(self, key: str, tooltip:Tooltip) -> None: self.tooltips[key] = tooltip
+    def set_tooltip(self, key: str, tooltip:Tooltip) -> None:
+        self.tooltips[key] = tooltip
+    
     def get_tooltip(self, key: str) -> Tooltip|None:
         return self.tooltips.get(key, None)
+    
     def rem_tooltip(self, key: str) -> Tooltip|None:
         if self.get_tooltip(key) is not None:
             del self.tooltips[key]

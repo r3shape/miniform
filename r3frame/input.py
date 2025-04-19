@@ -1,24 +1,4 @@
-from r3frame.globals import pg
-
-class Action_Map:
-    def __init__(self) -> None:
-        self.map:dict[str, int]={}
-
-    def bind(self, action:callable, key:int) -> None:
-        if not self.map.get(action.__name__, False):
-            self.map[action.__name__] = [ key, action ]
-
-    def update(self, key_state:list[bool], mouse_state:list[bool]) -> None:
-        for action in self.map:
-            try:
-                if key_state[ self.map[action][0] ]:
-                    self.map[action][1]()
-            except (IndexError, KeyError) as err:
-                try:
-                    if mouse_state[ self.map[action][0] ]:
-                        self.map[action][1]()
-                except (IndexError, KeyError) as err: ...
-
+from .globs import pg
 
 class Keyboard:
     # Letter keys

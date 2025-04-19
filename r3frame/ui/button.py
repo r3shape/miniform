@@ -1,4 +1,4 @@
-from r3frame.globals import pg
+from r3frame.globs import pg
 
 class Button:
     def __init__(self, font_path: str, text: str="Button", size: list[int]=[64, 64]) -> None:

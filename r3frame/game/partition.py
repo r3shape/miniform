@@ -1,0 +1,93 @@
+from r3frame.globs import pg
+
+class StaticPartition:
+    def __init__(self, size: list[int], cellsize: int) -> None:
+        self.objs = []
+        self.size = size                                                # in cells
+        self.width = size[0]                                            # in cells
+        self.height = size[1]                                           # in cells
+        self.cellsize = cellsize                                       # in pixels
+        self.cells = [[] for _ in range(self.width * self.height)]
+
+    def get_cell(self, location: list[int]) -> list:
+        """Returns all objects at the given world (pixel) position."""
+        gx = int(location[0]) // self.cellsize
+        gy = int(location[1]) // self.cellsize
+        if gx < 0 or gy < 0 or gx > self.size[0] or gy > self.size[1]: return
+        index = gy * self.width + gx
+        if index > len(self.cells): return
+        return self.cells[index]
+    
+    def set_cell(self, obj) -> None:
+        """Places an object in the grid at the given world (pixel) position."""
+        if isinstance(obj, list):
+            for o in obj:
+                if o is None: continue
+                cell = self.get_cell(o.location)
+                if cell is None: return
+                self.objs.append(o)
+                cell.append(o)
+        else:
+            cell = self.get_cell(obj.location)
+            if cell is None: return
+            self.objs.append(obj)
+            cell.append(obj)
+
+    def rem_cell(self, obj) -> None:
+        """Removes and an object from the grid at the given world (pixel) position."""
+        x, y = obj.location
+        if x < 0 or x >= self.size[0] or y < 0 or y >= self.size[1]: return
+        cell = self.get_cell([x, y])
+        if cell is None: return
+        self.objs.remove(obj)
+        cell.remove(obj)
+
+    def _generate_region(self, size:list[int], location:list[int]) -> list[list[int]]:
+        center = [
+            int(location[0]) // self.cellsize,
+            int(location[1]) // self.cellsize
+        ]; region = []
+        for x in range(center[0] - size[0], (center[0] + size[0]) + 1):
+            for y in range(center[1] - size[1], (center[1] + size[1]) + 1):
+                region.append([x, y])
+        return region
+    
+    def get_region(self, size:list[int], location:list[int]) -> list|None:
+        region = self._generate_region(size, location)
+        if not region: return None
+        cells = []
+        for map_location in region:
+            index = map_location[1] * self.size[0] + map_location[0]
+            if index > len(self.cells): continue
+            cell = self.cells[index]
+            if cell: cells.append(cell)
+        return cells
+
+    def debug_render(self, renderer, center: list[int|float], radius: int=8) -> None:
+        """Renders a portion of the grid around a center position within a given radius."""
+        cell_w, cell_h = self.cellsize, self.cellsize
+        radius_px = radius * cell_w  # convert radius from cells to pixels
+
+        # convert world position to grid cell indices
+        start_x = max((int(center[0]) - radius_px) // cell_w, 0)
+        start_y = max((int(center[1]) - radius_px) // cell_h, 0)
+        end_x = min((int(center[0]) + radius_px) // cell_w, self.size[0] - 1)
+        end_y = min((int(center[1]) + radius_px) // cell_h, self.size[1] - 1)
+
+        # draw grid lines within the region
+        for gx in range(start_x, end_x + 1):
+            x = gx * cell_w
+            renderer.window.draw_line([x, start_y * cell_h], [x, (end_y + 1) * cell_h], [125, 125, 125], 1)
+        
+        for gy in range(start_y, end_y + 1):
+            y = gy * cell_h
+            renderer.window.draw_line([start_x * cell_w, y], [(end_x + 1) * cell_w, y], [125, 125, 125], 1)
+
+        # draw objects within the visible region
+        for obj in self.objs:
+            x, y = obj.center()
+            gx = x // self.cellsize
+            gy = y // self.cellsize
+            if start_x <= gx <= end_x and start_y <= gy <= end_y:
+                obj_x, obj_y = gx * cell_w, gy * cell_h
+                renderer.window.draw_circle([obj_x + self.cellsize / 2, obj_y + self.cellsize / 2], self.cellsize, [0, 255, 0], 1)

@@ -1,6 +1,6 @@
-from r3frame.globals import pg
+from .globs import pg
 
-class Event_Manager:
+class EventManager:
     def __init__(self) -> None:
         self.quit: bool=False
 

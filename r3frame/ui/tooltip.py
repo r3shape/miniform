@@ -1,4 +1,4 @@
-from r3frame.globals import pg
+from r3frame.globs import pg
 
 class Tooltip:
     def __init__(self, font_path: str, text: str="Tooltip", size: list[int|float]=[100, 64]) -> None:

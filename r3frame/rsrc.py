@@ -1,5 +1,6 @@
-from r3frame.utils import damp_lin, math
-from r3frame.globals import pg, os, re, time
+from r3frame.globs import re, os, pg, time
+from r3frame.util import damp_lin
+from r3frame.game.obj import Object
 
 # ------------------------------------------------------------ #
 class Clock:
@@ -28,22 +29,28 @@ class Clock:
 class Window:
     def __init__(self, size: list[int], display_size: list[int], color: list[int]=[25, 25, 25]) -> None:
         self.icon = None
-        self.title = None
+        self.title = "HFWindow"
         self.size = size
         self.color = color
         self.clip_range = [1, 1]
         self.display_size = display_size
         self.window = pg.display.set_mode(size)
-        self.display = pg.Surface(self.display_size)
-
+        
         self.draw_line = lambda start, end, color, width: pg.draw.line(self.display, color, start, end, width=width)
         self.draw_rect = lambda size, location, color, width: pg.draw.rect(self.display, color, pg.Rect(location, size), width=width)
         self.draw_circle = lambda center, radius, color, width: pg.draw.circle(self.display, color, [*map(int, center)], radius, width)
         
         self.blit_rect = lambda rect, color, width: self.draw_rect(rect.size, rect.topleft, color, width)
 
-    def set_title(self, title: str) -> None: self.title = title
-    def set_icon(self, icon: pg.Surface) -> None: self.icon = icon
+        self.configure()
+
+    def set_title(self, title: str) -> None:
+        self.title = title
+        self.configure()
+
+    def set_icon(self, icon: pg.Surface) -> None:
+        self.icon = icon
+        self.configure()
 
     def configure(self) -> None:
         self.display = pg.Surface(self.display_size)
@@ -66,7 +73,36 @@ class Window:
 # ------------------------------------------------------------ #
 
 # ------------------------------------------------------------ #
-class Asset_Manager:
+class RFAnimation:
+    def __init__(self, frames: list[pg.Surface], loop: bool=1, frame_duration: float=5.0, frame_offset: list[int]=[0, 0]) -> None:
+        self.done = 0
+        self.frame = 0
+        self.loop = loop
+        self.flip_x = False
+        self.flip_y = False
+        self.frames = frames
+        self.frame_offset = frame_offset
+        self.frame_duration = frame_duration
+
+    def reset(self) -> None: self.frame, self.done = 0, 0
+
+    def copy(self):
+        return RFAnimation(self.frames, self.loop, self.frame_duration, self.frame_offset)
+
+    def get_frame(self):
+        return pg.transform.flip(self.frames[int(self.frame / self.frame_duration)], self.flip_x, self.flip_y)
+
+    def update(self) -> None:
+        if self.loop:
+            self.frame = (self.frame + 1) % (self.frame_duration * len(self.frames))
+        else:
+            self.frame = min(self.frame + 1, self.frame_duration * len(self.frames) - 1)
+            if self.frame >= self.frame_duration * len(self.frames) - 1:
+                self.done = 1
+# ------------------------------------------------------------ #
+
+# ------------------------------------------------------------ #
+class AssetManager:
     def __init__(self) -> None:
         self.font:dict = {}
         self.image:dict = {}
@@ -120,7 +156,7 @@ class Asset_Manager:
             return self.image[key]
         except (FileNotFoundError) as err: ...
     
-    def load_image_sheet(self, key: str, path: str, frameSize: list[int], colorKey: list=None) -> list:
+    def load_image_sheet(self, key: str, path: str, frameSize: list[int], scale: list=None, colorKey: list=None) -> list:
         try:
             sheet = self.load_image(key, path)
             frame_x = int(sheet.get_size()[0] / frameSize[0])
@@ -134,6 +170,7 @@ class Asset_Manager:
                     frame = pg.Surface(frameSize, pg.SRCALPHA).convert_alpha()
                     frame.set_colorkey(colorKey)
                     frame.blit(sheet, (0,0), pg.Rect((x, y), frameSize))   # blit the sheet at the desired coords (texture mapping)
+                    if scale: frame = self.scale_surface(frame, scale)
                     if self.image_visible(frame):
                         frames.append(frame)
             self.image[key] = frames
@@ -152,7 +189,91 @@ class Asset_Manager:
         if pixels-noPixels >= threshold:
             result = True
         return result
-# ------------------------------------------------------------ 
+# ------------------------------------------------------------ #
+
+# ------------------------------------------------------------ #
+class Tilemap:
+    def __init__(self, size: list[int], tilesize: int=32) -> None:
+        self.size = size                                        # in tiles
+        self.width = size[0]                                    # in tiles
+        self.height = size[1]                                   # in tiles
+        self.tilesize = tilesize                                # in pixels
+        self.data = [None for _ in range(size[0] * size[1])]
+        self.tiles = [None for _ in range(size[0] * size[1])]
+
+    def export_data(self, path: str) -> bool:
+        with open(path, "w") as save:
+            for c in map(str, self.data):
+                save.write(c)
+        return True
+    
+    def import_data(self, path:str) -> bool:
+        with open(path, "r") as save:
+            data = re.split(r'(\d)', save.read())
+            data = [t for t in data if t != '']
+            for i in range(len(data)):
+                try: data[i] = int(data[i])
+                except: pass
+            self.data = data
+        return True
+
+    def set_data(self, location: list[int], data: int|str) -> None:
+        mapx = location[0] // self.tilesize
+        mapy = location[1] // self.tilesize
+        if mapx < 0 or mapy < 0 or mapx > self.size[0] or mapy > self.size[1]: return
+        self.data[mapy * self.size[0] + mapx] = data
+
+    def get_data(self, location: list[int]) -> int|str|None:
+        mapx = location[0] // self.tilesize
+        mapy = location[1] // self.tilesize
+        if mapx < 0 or mapy < 0 or mapx > self.size[0] or mapy > self.size[1]: return None
+        return self.data[mapy * self.size[0] + mapx]
+
+    def read_data(self, data: list[int|str]) -> None:
+        for x in range(self.size[0]):
+            for y in range(self.size[1]):
+                self.set_data([x * self.tilesize, y * self.tilesize], data[y * self.size[0] + x])
+    
+    def get_tile(self, location: list[int]) -> Object|None:
+        mapx = location[0] // self.tilesize
+        mapy = location[1] // self.tilesize
+        if mapx < 0 or mapy < 0 or mapx > self.size[0] or mapy > self.size[1]: return None
+        return self.tiles[mapy * self.size[0] + mapx]
+
+    def _generate_region(self, size:list[int], location:list[int]) -> list[list[int]]:
+        center = [
+            int(location[0] // self.tilesize),
+            int(location[1] // self.tilesize)
+        ]; region = []
+        for x in range(center[0] - size[0], (center[0] + size[0]) + 1):
+            for y in range(center[1] - size[1], (center[1] + size[1]) + 1):
+                region.append([x, y])
+        return region
+
+    def get_region(self, size:list[int], location:list[int]) -> list[Object]|None:
+        region = self._generate_region(size, location)
+        if not region: return None
+        tiles = []
+        for map_location in region:
+            index = map_location[1] * self.size[0] + map_location[0]
+            if index < 0 or index >= (self.size[0] * self.size[1]): continue
+            tile = self.tiles[index]
+            if tile: tiles.append(tile)
+        return tiles
+
+    def load(self) -> None:
+        if not isinstance(self.data, list): return
+        for x in range(self.size[0]):
+            for y in range(self.size[1]):
+                data_tile = self.data[y * self.size[0] + x]
+                if data_tile != 0 and data_tile != None:
+                    tile = Object(
+                        size=[self.tilesize, self.tilesize], color=[255, 255, 255],
+                        location=[x * self.tilesize, y * self.tilesize]
+                    )
+                    tile.id = data_tile
+                    self.tiles[y * self.size[0] + x] = tile
+# ------------------------------------------------------------ #
 
 # ------------------------------------------------------------ #
 class Camera:
@@ -258,20 +379,6 @@ class Renderer:
         self.draw_calls = 0
         self._draw_calls = []  # draw_call layout : [surface, location]
 
-        self.draw_line = lambda start, end, color, width: pg.draw.line(
-            self.target, color,
-            [start[0] - self.camera.location[0], start[1] - self.camera.location[1]],
-            [end[0] - self.camera.location[0], end[1] - self.camera.location[1]], width=width
-        )
-
-        self.draw_rect = lambda size, location, color, width: pg.draw.rect(self.target, color, pg.Rect(
-            [location[0] - self.camera.location[0], location[1] - self.camera.last_location[1]], size), width=width)
-        
-        self.draw_circle = lambda center, radius, color, width: pg.draw.circle(
-            self.target, color, [*map(int, [center[0] - self.camera.location[0], center[1] - self.camera.location[1]])], radius, width)
-        
-        self.blit_rect = lambda rect, color, width: self.draw_rect(rect.size, [rect.topleft[0] - self.camera.location[0], rect.topleft[1] - self.camera.location[1]], color, width)
-
     def set_flag(self, flag: int) -> None:
         """Enables a rendering flag."""
         self.flags |= flag
@@ -307,79 +414,34 @@ class Renderer:
         self._draw_calls.append([surface, location])
         self.draw_calls += 1
 
-    def renderSW(self) -> None:
-        """
-        Renders objects directly onto the display.
-        
-        Solves the **per-object transformation bottleneck** by applying view transformations 
-        only to the display, making it efficient for **small game worlds**. Since transformations 
-        are applied at the display level, object positions remain true to world coordinates.
-        """
-        self.window.clear()
-        self.target = self.window.display
-
-        # compute scaling factors based on the viewport and window size.
-        display_size = [self.window.display_size[0] * self.camera.viewport_scale[0], self.window.display_size[1] * self.camera.viewport_scale[1]]
-
-        self.pre_render()
-        # render all objects
-        for i in range(self.draw_calls):
-            surface, location = self._draw_calls.pop(0)
-            self.window.blit(surface, location)
-        self.draw_calls = 0
-
-        # optionally render the camera's viewport for debugging
-        if (self.flags & self.FLAGS.SHOW_CAMERA):
-            self.blit_rect(self.camera.get_viewport(), [255, 255, 255], 1)
-            self.blit_rect(self.camera.get_center([10, 10]), [0, 255, 0], 1)
-
-        self.post_render()
-        # apply camera transformations at the display level (no per-object transformations)
-        self.window.window.blit(
-            pg.transform.scale(self.target, display_size),
-            [-self.camera.location[0] * self.camera.viewport_scale[0], -self.camera.location[1] * self.camera.viewport_scale[1]]
-        )
-
-    def renderLW(self) -> None:
+    def render(self) -> None:
         """
         Renders objects to a viewport-sized surface before scaling it up to the display.
         
         Solves the **display transformation bottleneck** by limiting rendering to objects within 
-        the camera's viewport, making it efficient for **large game worlds**. However, since 
-        transformations are applied per-object within the viewport, their positions are offset 
-        relative to the camera's location.
+        the camera's viewport, making it efficient for **large game worlds**. Since transformations 
+        are applied at the render-target/display level, object positions remain true to world coordinates.
         """
-        self.window.clear()
+        del self.target
         self.target = pg.Surface(self.camera.viewport_size)  # create a surface matching the viewport size.
         self.target.fill(self.window.color)
+        self.window.clear()
 
         self.pre_render()
-        # apply camera transformations on per-object basis (no display transformation)
         for i in range(self.draw_calls):
             surface, location = self._draw_calls.pop(0)
-            self.target.blit(surface, (location[0] - self.camera.location[0], location[1] - self.camera.location[1]))
+            self.window.blit(surface, location)
         self.draw_calls = 0
+        self.post_render()
 
         if (self.flags & self.FLAGS.SHOW_CAMERA):
-            viewport_rect = self.camera.get_viewport()
-            viewport_rect.topleft = (viewport_rect.x - self.camera.location[0], viewport_rect.y - self.camera.location[1])
-
-            center_rect = self.camera.get_center([10, 10])
-            center_rect.topleft = (center_rect.x - self.camera.location[0], center_rect.y - self.camera.location[1])
-
-            pg.draw.rect(self.target, [255, 255, 255], viewport_rect, 1)
-            pg.draw.rect(self.target, [0, 255, 0], center_rect, 1)
-
-        self.post_render()
+            self.window.blit_rect(self.camera.get_viewport(), [255, 255, 255], 1)
+            self.window.blit_rect(self.camera.get_center([10, 10]), [0, 255, 0], 1)
+        
+        # apply camera transformations at the render-target level (no per-object transformations)
+        self.target.blit(self.window.display, [-self.camera.location[0], -self.camera.location[1]])
         self.window.window.blit(
             pg.transform.scale(self.target, self.window.size),
             [0, 0]
         )
-
-    def flush(self) -> None:
-        """ Flushes the renderer draw call array, dynamically swapping between large-world rendering and small-world rendering based on view scale.
-            - (zoom effects are applied via Camera.mod_viewport() calls which require more of the world to be rendered)
-        """
-        if any(map(lambda s: s >= 0.4, self.camera.viewport_scale)): self.renderLW()
-        else: self.renderSW()
 # ------------------------------------------------------------ #

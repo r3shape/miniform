@@ -1,4 +1,4 @@
-import os, math, random
+from r3frame.globs import os, math
 
 sine_wave_value = lambda A, B, t, C, D: int(A * math.sin((B * t) + C) + D)
 """
@@ -51,7 +51,7 @@ This function simulates a linear friction effect by reducing `x` by a constant a
 
 def _asset_path(path: str) -> str:
     path = path.replace("/", os.sep).replace("\\", os.sep)
-    return f"{__file__.removesuffix("utils.py")}assets{os.sep}{path}"
+    return f"{__file__.removesuffix("util.py")}assets{os.sep}{path}"
 
 def point_inside(point: list[int|float], bounds: list[int|float]) -> bool:
     return \
@@ -71,3 +71,13 @@ def angle_to(from_point: list[int|float], to_point: list[int|float]) -> float:
         to_point[0] - from_point[0],
         to_point[1] - from_point[1]
     ])) 
+
+
+def bsort(data: list[int]) -> list[int]:
+    for i in range(len(data)-1, 0, -1):
+        for j in range(i):
+            if data[j] > data[j+1]:
+                temp = data[j]
+                data[j] = data[j+1]
+                data[j+1] = temp
+
