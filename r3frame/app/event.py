@@ -1,4 +1,4 @@
-from .globs import pg
+from r3frame.globs import pg
 
 class EventManager:
     def __init__(self) -> None:

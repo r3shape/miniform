@@ -1,4 +1,4 @@
-from .globs import pg
+from r3frame.globs import pg
 
 class Keyboard:
     # Letter keys

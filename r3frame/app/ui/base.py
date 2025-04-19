@@ -1,9 +1,9 @@
 from r3frame.globs import pg
-from r3frame.input import Mouse
-from r3frame.rsrc import Window
+from r3frame.app.input import Mouse
+from r3frame.app.rsrc import Window
 from r3frame.util import point_inside
-from r3frame.ui.button import Button
-from r3frame.ui.tooltip import Tooltip
+from r3frame.app.ui.button import Button
+from r3frame.app.ui.tooltip import Tooltip
 
 class Interface:
     def __init__(
