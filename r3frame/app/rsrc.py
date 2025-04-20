@@ -73,7 +73,7 @@ class Window:
 # ------------------------------------------------------------ #
 
 # ------------------------------------------------------------ #
-class RFAnimation:
+class Animation:
     def __init__(self, frames: list[pg.Surface], loop: bool=1, frame_duration: float=5.0, frame_offset: list[int]=[0, 0]) -> None:
         self.done = 0
         self.frame = 0
