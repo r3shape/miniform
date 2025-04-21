@@ -1,16 +1,20 @@
 from r3frame.globs import pg
-from r3frame.util import _asset_path
+from r3frame.util import abs_path
 
 from r3frame.app.scene import Scene
+from r3frame.app.clock import Clock
+from r3frame.app.window import Window
+from r3frame.app.camera import Camera
+from r3frame.app.renderer import Renderer
 from r3frame.app.event import EventManager
-from r3frame.app.resource import Clock, Window, Camera, Renderer, AssetManager
+from r3frame.app.resource.manager import ResourceManager
 
 class Application:
     def __init__(self, name: str="My App", window_size: list[int]=[800, 600]) -> None:
         self.name = name
         self.clock = Clock()
-        self.assets = AssetManager()
         self.events = EventManager()
+        self.resource = ResourceManager()
 
         self.scene: str = None
         self.scene: Scene = None
@@ -18,7 +22,7 @@ class Application:
 
         self.window = Window(window_size, window_size)
         self.window.title = name
-        self.window.icon = pg.image.load(_asset_path("images/r3-logo.ico"))
+        self.window.icon = pg.image.load(abs_path("assets/images/r3-logo.ico"))
         self.window.configure(window_size)
 
         self.camera = Camera(self.window)

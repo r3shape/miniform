@@ -1,12 +1,12 @@
 from r3frame.globs import pg
-from r3frame.util import _asset_path
+from r3frame.util import abs_path
 
 # ------------------------------------------------------------ #
 class Element:
     def __init__(
             self, text: str="Element",
             size: list[int]=[64, 64], location: list[int]=[0, 0],
-            font_path: str=_asset_path("fonts/megamax.ttf")
+            font_path: str=abs_path("assets/fonts/megamax.ttf")
         ) -> None:
         self.hovered = False
         self.show_border = False

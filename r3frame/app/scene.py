@@ -1,5 +1,5 @@
 from r3frame.globs import pg
-from r3frame.util import _asset_path
+from r3frame.util import abs_path
 from r3frame.app.ui.base import Interface
 from r3frame.game import Tilemap, StaticPartition
 
@@ -12,7 +12,7 @@ class Scene:
             interface_size: list[int]=[100, 100],
             display_color: list[int]=[203, 219, 252],
             interface_location: list[int]=[0, 0],
-            font_path: str=_asset_path("fonts/megamax.ttf"),
+            font_path: str=abs_path("assets/fonts/megamax.ttf"),
     ) -> None:
         self.app = app
         self.name: str = name

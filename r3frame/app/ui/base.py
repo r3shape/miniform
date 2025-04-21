@@ -1,6 +1,6 @@
 from r3frame.globs import pg
 from r3frame.app.input import Mouse
-from r3frame.app.resource import Window
+from r3frame.app.window import Window
 from r3frame.util import point_inside
 from r3frame.app.ui.element import Element
 

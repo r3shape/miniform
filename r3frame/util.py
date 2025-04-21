@@ -49,9 +49,23 @@ This function simulates a linear friction effect by reducing `x` by a constant a
 - Ensures the value stops completely when it gets close to 0.
 """
 
+equal_arrays = lambda a, b: all([*map(lambda a, b: a == b, a, b)])
+unequal_arrays = lambda a, b: all([*map(lambda a, b: a != b, a, b)])
+
 def _asset_path(path: str) -> str:
     path = path.replace("/", os.sep).replace("\\", os.sep)
     return f"{__file__.removesuffix("util.py")}assets{os.sep}{path}"
+
+def abs_path(path: str) -> str:
+    fp = __file__.split(os.sep)
+    fp.remove(fp[len(fp)-1])
+    [fp.append(p) for p in path.replace("/", os.sep).replace("\\", os.sep).split(os.sep)]
+    fp = f"{os.sep}".join(fp)
+    return fp
+
+def rel_path(path: str) -> str:
+    fp = path.replace("/", os.sep).replace("\\", os.sep)
+    return fp
 
 def point_inside(point: list[int|float], bounds: list[int|float]) -> bool:
     return \
@@ -80,4 +94,3 @@ def bsort(data: list[int]) -> list[int]:
                 temp = data[j]
                 data[j] = data[j+1]
                 data[j+1] = temp
-
