@@ -1,5 +1,6 @@
 from r3frame.globs import pg
 
+# ------------------------------------------------------------ #
 class Keyboard:
     # Letter keys
     A = pg.K_a
@@ -132,7 +133,10 @@ class Keyboard:
     Tab = pg.K_TAB
     Enter = pg.K_RETURN
     Menu = pg.K_MENU
+# ------------------------------------------------------------ #
 
+
+# ------------------------------------------------------------ #
 class Mouse:
     LeftClick = 1
     WheelClick = 2
@@ -142,8 +146,9 @@ class Mouse:
 
     Hovering = None
 
-    def rel_location() -> list:
-        return [*pg.mouse.get_rel()]
-    
-    def get_location() -> list:
-        return [*pg.mouse.get_pos()]
+    class location:
+        rel: list = [0, 0]
+        view: list = [0, 0]
+        world: list = [0, 0]
+        screen: list = [0, 0]
+# ------------------------------------------------------------ #

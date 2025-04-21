@@ -93,7 +93,7 @@ class ResourceManager:
                     frame = Image(rid, pg.Surface(frame_size, pg.SRCALPHA).convert_alpha())
                     frame.data.set_colorkey(colorKey)
                     frame.data.blit(sheet.data, (0,0), pg.Rect((x, y), frame_size))   # blit the sheet at the desired coords (texture mapping)
-                    if scale: frame.data = self.scale_surface(frame, scale)
+                    if scale: frame.data = self.scale_surface(frame.data, scale)
                     if self.image_visible(frame):
                         frames.append(frame)
                         rid += 1

@@ -1,5 +1,6 @@
 from r3frame.globs import pg
 
+# ------------------------------------------------------------ #
 class EventManager:
     def __init__(self) -> None:
         self.quit: bool=False
@@ -56,4 +57,4 @@ class EventManager:
 
     def mouse_pressed(self, button):
         return self.mouse.get(button, False) and not self.mouse_old.get(button, False)
-    
+# ------------------------------------------------------------ #

@@ -4,6 +4,7 @@ from r3frame.app.window import Window
 from r3frame.util import point_inside
 from r3frame.app.ui.element import Element
 
+# ------------------------------------------------------------ #
 class Interface:
     def __init__(
             self, name: str, window: Window,
@@ -71,8 +72,7 @@ class Interface:
 
     def update(self, event_manager) -> None:
         for element in self.elements.values():
-            mouse_location = Mouse.get_location()
-            mouse_within = point_inside(mouse_location, [
+            mouse_within = point_inside(Mouse.location.screen, [
                 element.location[0] - element.border_size[0], element.location[1] - element.border_size[1],
                 element.size[0] + element.border_size[0], element.size[1] + element.border_size[1]
             ])
@@ -87,3 +87,4 @@ class Interface:
             if element.hovered and event_manager.mouse_pressed(Mouse.LeftClick):
                 event_manager.mouse[Mouse.LeftClick] = 0    # shouldnt need this but fixes the element double-click issue :|
                 element.on_click()
+# ------------------------------------------------------------ #

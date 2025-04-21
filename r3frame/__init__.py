@@ -1,6 +1,4 @@
 import r3frame.app as app
-import r3frame.app.ui as ui
-import r3frame.app.resource as resource
 import r3frame.game as game
 import r3frame.util as util
 import r3frame.version as version

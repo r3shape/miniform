@@ -2,6 +2,7 @@ from r3frame.globs import pg
 from r3frame.util import equal_arrays
 from r3frame.app.resource.base import Resource
 
+# ------------------------------------------------------------ #
 class Image(Resource):
     def __init__(self, rid: int, data: pg.Surface, color: list[int]=[255, 255, 255]) -> None:
         super().__init__(rid, data)
@@ -24,3 +25,4 @@ class Image(Resource):
             self.size[1] * scale[1]
         ])
         self.scale = scale
+# ------------------------------------------------------------ #

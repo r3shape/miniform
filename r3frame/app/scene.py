@@ -3,6 +3,7 @@ from r3frame.util import abs_path
 from r3frame.app.ui.base import Interface
 from r3frame.game import Tilemap, StaticPartition
 
+# ------------------------------------------------------------ #
 class Scene:
     def __init__(
             self, app, name: str,
@@ -42,3 +43,4 @@ class Scene:
     def handle_events(self) -> None: raise NotImplementedError
     def handle_update(self) -> None: raise NotImplementedError
     def handle_render(self) -> None: raise NotImplementedError
+# ------------------------------------------------------------ #
