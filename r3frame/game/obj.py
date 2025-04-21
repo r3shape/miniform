@@ -1,6 +1,7 @@
 from r3frame.globs import pg
 from r3frame.util import damp_lin
 
+# ------------------------------------------------------------ #
 class Object:
     def __init__(self, size: list[int]=[32, 32], color: list[int]=[255, 255, 255], location: list[int]=[0, 0], mass: float=100, image_offset: list[int]=[0, 0]) -> None:
         self.id = "obj"
@@ -79,3 +80,4 @@ class Object:
                 self.location[1] = rect.y
 
         self.velocity = [*map(lambda v: damp_lin(v, self.mass, self.minvelocity, delta_time), self.velocity)]
+# ------------------------------------------------------------ #

@@ -1,4 +1,4 @@
-from r3frame.globs import re, os, pg, time
+from r3frame.globs import re, os, pg, time, random
 from r3frame.util import damp_lin
 from r3frame.game.obj import Object
 
@@ -42,7 +42,7 @@ class Window:
         
         self.blit_rect = lambda rect, color, width: self.draw_rect(rect.size, rect.topleft, color, width)
 
-        self.configure()
+        self.configure(display_size)
 
     def set_title(self, title: str) -> None:
         self.title = title
@@ -52,8 +52,9 @@ class Window:
         self.icon = icon
         self.configure()
 
-    def configure(self) -> None:
-        self.display = pg.Surface(self.display_size)
+    def configure(self, display_size: list[int]) -> None:
+        self.display_size = display_size
+        self.display = pg.Surface(display_size)
         if isinstance(self.title, str): pg.display.set_caption(self.title)
         if isinstance(self.icon, pg.Surface): pg.display.set_icon(self.icon)
 
@@ -87,7 +88,7 @@ class Animation:
     def reset(self) -> None: self.frame, self.done = 0, 0
 
     def copy(self):
-        return RFAnimation(self.frames, self.loop, self.frame_duration, self.frame_offset)
+        return Animation(self.frames, self.loop, self.frame_duration, self.frame_offset)
 
     def get_frame(self):
         return pg.transform.flip(self.frames[int(self.frame / self.frame_duration)], self.flip_x, self.flip_y)
@@ -192,90 +193,6 @@ class AssetManager:
 # ------------------------------------------------------------ #
 
 # ------------------------------------------------------------ #
-class Tilemap:
-    def __init__(self, size: list[int], tilesize: int=32) -> None:
-        self.size = size                                        # in tiles
-        self.width = size[0]                                    # in tiles
-        self.height = size[1]                                   # in tiles
-        self.tilesize = tilesize                                # in pixels
-        self.data = [None for _ in range(size[0] * size[1])]
-        self.tiles = [None for _ in range(size[0] * size[1])]
-
-    def export_data(self, path: str) -> bool:
-        with open(path, "w") as save:
-            for c in map(str, self.data):
-                save.write(c)
-        return True
-    
-    def import_data(self, path:str) -> bool:
-        with open(path, "r") as save:
-            data = re.split(r'(\d)', save.read())
-            data = [t for t in data if t != '']
-            for i in range(len(data)):
-                try: data[i] = int(data[i])
-                except: pass
-            self.data = data
-        return True
-
-    def set_data(self, location: list[int], data: int|str) -> None:
-        mapx = location[0] // self.tilesize
-        mapy = location[1] // self.tilesize
-        if mapx < 0 or mapy < 0 or mapx > self.size[0] or mapy > self.size[1]: return
-        self.data[mapy * self.size[0] + mapx] = data
-
-    def get_data(self, location: list[int]) -> int|str|None:
-        mapx = location[0] // self.tilesize
-        mapy = location[1] // self.tilesize
-        if mapx < 0 or mapy < 0 or mapx > self.size[0] or mapy > self.size[1]: return None
-        return self.data[mapy * self.size[0] + mapx]
-
-    def read_data(self, data: list[int|str]) -> None:
-        for x in range(self.size[0]):
-            for y in range(self.size[1]):
-                self.set_data([x * self.tilesize, y * self.tilesize], data[y * self.size[0] + x])
-    
-    def get_tile(self, location: list[int]) -> Object|None:
-        mapx = location[0] // self.tilesize
-        mapy = location[1] // self.tilesize
-        if mapx < 0 or mapy < 0 or mapx > self.size[0] or mapy > self.size[1]: return None
-        return self.tiles[mapy * self.size[0] + mapx]
-
-    def _generate_region(self, size:list[int], location:list[int]) -> list[list[int]]:
-        center = [
-            int(location[0] // self.tilesize),
-            int(location[1] // self.tilesize)
-        ]; region = []
-        for x in range(center[0] - size[0], (center[0] + size[0]) + 1):
-            for y in range(center[1] - size[1], (center[1] + size[1]) + 1):
-                region.append([x, y])
-        return region
-
-    def get_region(self, size:list[int], location:list[int]) -> list[Object]|None:
-        region = self._generate_region(size, location)
-        if not region: return None
-        tiles = []
-        for map_location in region:
-            index = map_location[1] * self.size[0] + map_location[0]
-            if index < 0 or index >= (self.size[0] * self.size[1]): continue
-            tile = self.tiles[index]
-            if tile: tiles.append(tile)
-        return tiles
-
-    def load(self) -> None:
-        if not isinstance(self.data, list): return
-        for x in range(self.size[0]):
-            for y in range(self.size[1]):
-                data_tile = self.data[y * self.size[0] + x]
-                if data_tile != 0 and data_tile != None:
-                    tile = Object(
-                        size=[self.tilesize, self.tilesize], color=[255, 255, 255],
-                        location=[x * self.tilesize, y * self.tilesize]
-                    )
-                    tile.id = data_tile
-                    self.tiles[y * self.size[0] + x] = tile
-# ------------------------------------------------------------ #
-
-# ------------------------------------------------------------ #
 class Camera:
     class MODES:
         CENTER_ON: int = 1
@@ -291,6 +208,16 @@ class Camera:
 
         self.bounds = window.display_size
         self.viewport_size = window.display_size
+        self.viewport_scale = [
+            self.window.size[0] / self.viewport_size[0],
+            self.window.size[1] / self.viewport_size[1]
+        ]
+        self.center = [self.location[0] + self.viewport_size[0] / 2, self.location[1] + self.viewport_size[1] / 2]
+        self.mod_viewport(-self.viewport_size[0] - self.viewport_size[1])
+
+    def configure(self, display_size: list[int]) -> None:
+        self.bounds = display_size
+        self.viewport_size = display_size
         self.viewport_scale = [
             self.window.size[0] / self.viewport_size[0],
             self.window.size[1] / self.viewport_size[1]

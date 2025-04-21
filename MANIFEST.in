@@ -1,2 +1,1 @@
-include r3frame/assets/fonts/*
-include r3frame/assets/images/*
+include r3frame/assets/*

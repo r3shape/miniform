@@ -1,9 +1,8 @@
 from r3frame.globs import pg
 from r3frame.app.input import Mouse
-from r3frame.app.rsrc import Window
+from r3frame.app.resource import Window
 from r3frame.util import point_inside
-from r3frame.app.ui.button import Button
-from r3frame.app.ui.tooltip import Tooltip
+from r3frame.app.ui.element import Element
 
 class Interface:
     def __init__(
@@ -18,8 +17,7 @@ class Interface:
         self.size: list[int] = size
         self.location: list[float] = location
 
-        self.buttons: dict[str, Button] = {}
-        self.tooltips: dict[str, Button] = {}
+        self.elements: dict[str, Element] = {}
         
         self.font_path = font_path
         self.text_size: int = text_size
@@ -31,25 +29,15 @@ class Interface:
         self.show_name = True
         self.display = pg.Surface(size)
 
-    def set_button(self, key: str, button: Button) -> None:
-        self.buttons[key] = button
+    def set_element(self, key: str, element: Element) -> None:
+        self.elements[key] = element
     
-    def get_button(self, key: str) -> Button|None:
-        return self.buttons.get(key, None)
+    def get_element(self, key: str) -> Element|None:
+        return self.elements.get(key, None)
     
-    def rem_button(self, key: str) -> Button|None:
-        if self.get_button(key) is not None:
-            del self.buttons[key]
-
-    def set_tooltip(self, key: str, tooltip:Tooltip) -> None:
-        self.tooltips[key] = tooltip
-    
-    def get_tooltip(self, key: str) -> Tooltip|None:
-        return self.tooltips.get(key, None)
-    
-    def rem_tooltip(self, key: str) -> Tooltip|None:
-        if self.get_tooltip(key) is not None:
-            del self.tooltips[key]
+    def rem_element(self, key: str) -> Element|None:
+        if self.get_element(key) is not None:
+            del self.elements[key]
 
     def set_text_field(self, field: str, text: str, color: list[int]=None) -> bool:
         try:
@@ -78,26 +66,24 @@ class Interface:
             ]
             self.window.window.blit(text_surface, text_location)
 
-        for tooltip in self.tooltips.values():  # render tooltips
-            tooltip.render(self.window.window)
-        for button in self.buttons.values():    # render buttons
-            button.render(self.window.window)
+        for element in self.elements.values():    # render elements
+            element.render(self.window.window)
 
     def update(self, event_manager) -> None:
-        for button in self.buttons.values():
+        for element in self.elements.values():
             mouse_location = Mouse.get_location()
             mouse_within = point_inside(mouse_location, [
-                button.location[0] - button.border_size[0], button.location[1] - button.border_size[1],
-                button.size[0] + button.border_size[0], button.size[1] + button.border_size[1]
+                element.location[0] - element.border_size[0], element.location[1] - element.border_size[1],
+                element.size[0] + element.border_size[0], element.size[1] + element.border_size[1]
             ])
-            if not button.hovered and mouse_within:
-                Mouse.Hovering = button
-                button.hovered = True
-                button.on_hover()
-            if button.hovered and not mouse_within:
+            if not element.hovered and mouse_within:
+                Mouse.Hovering = element
+                element.hovered = True
+                element.on_hover()
+            if element.hovered and not mouse_within:
                 Mouse.Hovering = None
-                button.hovered = False
-                button.on_unhover()
-            if button.hovered and event_manager.mouse_pressed(Mouse.LeftClick):
-                event_manager.mouse[Mouse.LeftClick] = 0    # shouldnt need this but fixes the button double-click issue :|
-                button.on_click()
+                element.hovered = False
+                element.on_unhover()
+            if element.hovered and event_manager.mouse_pressed(Mouse.LeftClick):
+                event_manager.mouse[Mouse.LeftClick] = 0    # shouldnt need this but fixes the element double-click issue :|
+                element.on_click()
