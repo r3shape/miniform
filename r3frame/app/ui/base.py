@@ -1,4 +1,4 @@
-from r3frame.globs import pg
+from r3frame.globs import os, pg
 from r3frame.app.input import Mouse
 from r3frame.app.window import Window
 from r3frame.util import point_inside
@@ -30,13 +30,19 @@ class Interface:
         self.show_name = True
         self.display = pg.Surface(size)
 
+    def load_font(self, font_path: str) -> None:
+        if not isinstance(font_path, str) or not os.path.exists(font_path): return
+        del self.font
+        self.font_path = font_path
+        self.font: pg.Font = pg.Font(font_path, self.text_size)
+
     def set_element(self, key: str, element: Element) -> None:
         self.elements[key] = element
     
-    def get_element(self, key: str) -> Element|None:
+    def get_element(self, key: str) -> Element:
         return self.elements.get(key, None)
     
-    def rem_element(self, key: str) -> Element|None:
+    def rem_element(self, key: str) -> None:
         if self.get_element(key) is not None:
             del self.elements[key]
 
@@ -72,12 +78,13 @@ class Interface:
 
     def update(self, event_manager) -> None:
         for element in self.elements.values():
+            element.update(event_manager)
             mouse_within = point_inside(Mouse.location.screen, [
                 element.location[0] - element.border_size[0], element.location[1] - element.border_size[1],
                 element.size[0] + element.border_size[0], element.size[1] + element.border_size[1]
             ])
             if not element.hovered and mouse_within:
-                Mouse.Hovering = element
+                Mouse.Hovering = Element
                 element.hovered = True
                 element.on_hover()
             if element.hovered and not mouse_within:

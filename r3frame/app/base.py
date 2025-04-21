@@ -8,6 +8,7 @@ from r3frame.app.camera import Camera
 from r3frame.app.renderer import Renderer
 from r3frame.app.event import EventManager
 from r3frame.app.input import Keyboard, Mouse
+from r3frame.app.resource.image import Image
 from r3frame.app.resource.manager import ResourceManager
 
 # ------------------------------------------------------------ #
@@ -70,6 +71,14 @@ class Application:
                 self.handle_render()
                 self.renderer.render()
                 self.scene.interface.render()
+                
+                if isinstance(Mouse.cursor.image, Image):
+                    self.window.window.blit(Mouse.cursor.image.data, Mouse.location.screen)
+
+                Mouse.location.world = [
+                    Mouse.location.view[0] // self.scene.tilemap.tilesize,
+                    Mouse.location.view[1] // self.scene.tilemap.tilesize
+                ]
             else:
                 self.handle_events()
 
@@ -78,16 +87,14 @@ class Application:
 
                 self.handle_render()
                 self.renderer.render()
+                if isinstance(Mouse.cursor.image, Image):
+                    self.window.window.blit(Mouse.cursor.image.data, Mouse.location.screen)
 
             Mouse.location.rel = [*pg.mouse.get_rel()]
             Mouse.location.screen = [*pg.mouse.get_pos()]
             Mouse.location.view = [
                 int(Mouse.location.screen[0] // self.camera.viewport_scale[0] + self.camera.location[0]),
                 int(Mouse.location.screen[1] // self.camera.viewport_scale[1] + self.camera.location[1]),
-            ]
-            Mouse.location.world = [
-                Mouse.location.view[0] // self.scene.tilemap.tilesize,
-                Mouse.location.view[1] // self.scene.tilemap.tilesize
             ]
             self.window.update()
             self.clock.rest()

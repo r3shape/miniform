@@ -91,7 +91,7 @@ class Tilemap(Object):
         mapx = location[0] // self.tilesize
         mapy = location[1] // self.tilesize
         if mapx < 0 or mapy < 0 or mapx >= self.sizet[0] or mapy >= self.sizet[1]: return None
-        return self.data[mapy * self.sizet[0] + mapx]
+        return self.tiles[mapy * self.sizet[0] + mapx]
 
     def set_tile(self, tile_id: int, location: list[int]) -> None:
         if self.get_tile(location) is not None: return

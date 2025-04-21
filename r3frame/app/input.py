@@ -1,4 +1,5 @@
 from r3frame.globs import pg
+from r3frame.app.resource.image import Image
 
 # ------------------------------------------------------------ #
 class Keyboard:
@@ -151,4 +152,8 @@ class Mouse:
         view: list = [0, 0]
         world: list = [0, 0]
         screen: list = [0, 0]
+
+    class cursor:
+        image: Image = None
+        visible = lambda flag: pg.mouse.set_visible(flag)
 # ------------------------------------------------------------ #

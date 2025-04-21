@@ -1,5 +1,6 @@
 from r3frame.globs import pg
 from r3frame.app.camera import Camera
+from r3frame.app.resource.image import Image
 
 # ------------------------------------------------------------ #
 class Renderer:
@@ -23,7 +24,7 @@ class Renderer:
         self.target = self.window.display
         self.flags = 0
         self.draw_calls = 0
-        self._draw_calls = []  # draw_call layout : [surface, location]
+        self._draw_calls = []  # draw_call layout : [image, location]
 
     def set_flag(self, flag: int) -> None:
         """Enables a rendering flag."""
@@ -38,7 +39,7 @@ class Renderer:
     
     def post_render(self) -> None: pass
 
-    def draw_call(self, surface: pg.Surface, location: list[int]) -> None:
+    def draw_call(self, image: Image, location: list[int]) -> None:
         """
         Queues a draw call for rendering.
 
@@ -51,13 +52,13 @@ class Renderer:
             return
 
         # frustum culling
-        if ((location[0] + surface.size[0]) - self.window.clip_range[0] < self.camera.location[0] or 
+        if ((location[0] + image.size[0]) - self.window.clip_range[0] < self.camera.location[0] or 
             location[0] + self.window.clip_range[0] > self.camera.location[0] + self.camera.viewport_size[0]) or \
-           ((location[1] + surface.size[1]) - self.window.clip_range[1] < self.camera.location[1] or 
+           ((location[1] + image.size[1]) - self.window.clip_range[1] < self.camera.location[1] or 
             location[1] + self.window.clip_range[1] > self.camera.location[1] + self.camera.viewport_size[1]):
             return
 
-        self._draw_calls.append([surface, location])
+        self._draw_calls.append([image, location])
         self.draw_calls += 1
 
     def render(self) -> None:
@@ -75,8 +76,8 @@ class Renderer:
 
         self.pre_render()
         for i in range(self.draw_calls):
-            surface, location = self._draw_calls.pop(0)
-            self.window.blit(surface, location)
+            image, location = self._draw_calls.pop(0)
+            self.window.blit(image, location)
         self.draw_calls = 0
         self.post_render()
 
