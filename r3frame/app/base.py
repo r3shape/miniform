@@ -14,25 +14,35 @@ from r3frame.app.resource.manager import ResourceManager
 # ------------------------------------------------------------ #
 class Application:
     def __init__(self, name: str="My App", window_size: list[int]=[800, 600]) -> None:
-        self.name = name
-        self.clock = Clock()
-        self.events = EventManager()
-        self.resource = ResourceManager()
+        self.state: int = 0
+        self.name:str = name
+        self.clock: Clock = Clock()
+        self.events: EventManager = EventManager()
+        self.resource: ResourceManager = ResourceManager()
 
         self.scene: str = None
         self.scene: Scene = None
         self.scenes: dict[str, Scene] = {}
 
-        self.window = Window(window_size, window_size)
+        self.window: Window = Window(window_size, window_size)
         self.window.title = name
         self.window.icon = pg.image.load(abs_path("assets/images/r3-logo.ico"))
         self.window.configure(window_size)
 
-        self.camera = Camera(self.window)
-        self.renderer = Renderer(self.camera)
+        self.camera: Camera = Camera(self.window)
+        self.renderer: Renderer = Renderer(self.camera)
 
         self.configure()
     
+    def set_state(self, flag: int) -> None:
+        self.state |= flag
+
+    def get_state(self, flag: int) -> bool:
+        return ((self.state & flag) == flag)
+
+    def rem_state(self, flag: int) -> None:
+        self.state &= ~flag
+
     def set_scene(self, scene: Scene) -> None:
         self.scenes[scene.name] = scene
         self.scene = self.scenes[scene.name]

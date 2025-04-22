@@ -44,7 +44,7 @@ class ResourceManager:
             if scale: image = self.scale_surface(image, scale)
             
             rid = len(self.image.values())
-            self.image[key] = Image(rid, image)
+            self.image[key] = Image(rid, path, image)
             return self.image[key]
         except (FileNotFoundError) as err: print(err)
     
@@ -71,7 +71,7 @@ class ResourceManager:
                     full_path = path + '/' + image
                     image_surface = self.load_image(full_path, scale, colorKey)
                     if self.image_visible(image_surface):
-                        img = Image(rid, image_surface)
+                        img = Image(rid, path, image_surface)
                         images.append(img)
                         rid += 1
             self.image[key] = images
@@ -90,10 +90,10 @@ class ResourceManager:
                 for col in range(frame_x):
                     x = col * frame_size[0]
                     y = row * frame_size[1]
-                    frame = Image(rid, pg.Surface(frame_size, pg.SRCALPHA).convert_alpha())
+                    frame = Image(rid, path, pg.Surface(frame_size, pg.SRCALPHA).convert_alpha())
                     frame.data.set_colorkey(colorKey)
                     frame.data.blit(sheet.data, (0,0), pg.Rect((x, y), frame_size))   # blit the sheet at the desired coords (texture mapping)
-                    if scale: frame.data = self.scale_surface(frame.data, scale)
+                    if scale: frame.set_scale(scale)
                     if self.image_visible(frame):
                         frames.append(frame)
                         rid += 1

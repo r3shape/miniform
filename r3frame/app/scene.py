@@ -34,7 +34,7 @@ class Scene:
 
         self.world_size: list[int] = world_size
         self.world_cellsize: int = world_cellsize
-        self.tilemap: Tilemap = Tilemap(world_size, world_cellsize)
+        self.tilemap: Tilemap = Tilemap(app, world_size, world_cellsize)
         self.partition: StaticPartition = StaticPartition(world_size, world_cellsize)
         
         self.configure()

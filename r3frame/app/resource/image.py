@@ -4,8 +4,9 @@ from r3frame.app.resource.base import Resource
 
 # ------------------------------------------------------------ #
 class Image(Resource):
-    def __init__(self, rid: int, data: pg.Surface, color: list[int]=[255, 255, 255]) -> None:
+    def __init__(self, rid: int, path: str, data: pg.Surface, color: list[int]=[255, 255, 255]) -> None:
         super().__init__(rid, data)
+        self.path: str = path
         self.rotation: float = 0.0
         self.color: list[int] = color
         self.scale: list[float] = [1.0, 1.0]
@@ -17,7 +18,7 @@ class Image(Resource):
         self.data.fill(color if color else self.color)
         self.color = color if color else self.color
 
-    def scale(self, scale: list[float]) -> None:
+    def set_scale(self, scale: list[float]) -> None:
         if not isinstance(scale, list): return
         if equal_arrays(self.scale, scale): return
         self.data = pg.transform.scale(self.data, [

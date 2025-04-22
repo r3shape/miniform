@@ -8,3 +8,6 @@ from r3frame.app.input import Keyboard, Mouse
 
 from r3frame.app.scene import Scene
 from r3frame.app.base import Application
+
+import r3frame.app.ui as ui
+import r3frame.app.resource as resource
