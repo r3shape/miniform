@@ -1,17 +1,19 @@
+from r3frame.atom import Atom
 from r3frame.globs import os, pg
 from r3frame.app.input import Mouse
 from r3frame.app.window import Window
 from r3frame.util import point_inside
-from r3frame.app.ui.element import Element
+from r3frame.app.ui.element import ELEMENT_STATE, Element
 
 # ------------------------------------------------------------ #
-class Interface:
+class Interface(Atom):
     def __init__(
             self, name: str, window: Window,
             size: list[int], location: list[float],
             font_path:str, title_color:list[int]=[255, 255, 255],
             text_color:list[int]=[255, 255, 255], text_size: int=18
         ) -> None:
+        super().__init__(0, 0)
         pg.font.init()
         self.name = name
         self.window = window
@@ -83,15 +85,15 @@ class Interface:
                 element.location[0] - element.border_size[0], element.location[1] - element.border_size[1],
                 element.size[0] + element.border_size[0], element.size[1] + element.border_size[1]
             ])
-            if not element.hovered and mouse_within:
+            if not element.get_state(ELEMENT_STATE.HOVERED) and mouse_within:
                 Mouse.Hovering = Element
-                element.hovered = True
+                element.set_state(ELEMENT_STATE.HOVERED)
                 element.on_hover()
-            if element.hovered and not mouse_within:
+            if element.get_state(ELEMENT_STATE.HOVERED) and not mouse_within:
                 Mouse.Hovering = None
-                element.hovered = False
+                element.rem_state(ELEMENT_STATE.HOVERED)
                 element.on_unhover()
-            if element.hovered and event_manager.mouse_pressed(Mouse.LeftClick):
+            if element.get_state(ELEMENT_STATE.HOVERED) and event_manager.mouse_pressed(Mouse.LeftClick):
                 event_manager.mouse[Mouse.LeftClick] = 0    # shouldnt need this but fixes the element double-click issue :|
                 element.on_click()
 # ------------------------------------------------------------ #

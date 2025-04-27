@@ -82,8 +82,8 @@ class Renderer:
         self.post_render()
 
         if (self.flags & self.FLAGS.SHOW_CAMERA):
-            self.window.blit_rect(self.camera.get_viewport(), [255, 255, 255], 1)
-            self.window.blit_rect(self.camera.get_center([10, 10]), [0, 255, 0], 1)
+            self.window.blit_rect(self.camera.get_viewport(), color=[255, 255, 255], width=1)
+            self.window.blit_rect(self.camera.get_center([10, 10]), color=[0, 255, 0], width=1)
         
         # apply camera transformations at the render-target level (no per-object transformations)
         self.target.blit(self.window.display, [-self.camera.location[0], -self.camera.location[1]])

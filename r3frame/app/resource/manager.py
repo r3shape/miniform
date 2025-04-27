@@ -20,6 +20,11 @@ class ResourceManager:
         self.scale_surface = lambda surface, scale: pg.transform.scale(surface, scale)
         self.rotate_surface = lambda surface, angle: pg.transform.rotate(surface, angle)
 
+        self.blit_rect = lambda rect, color, width: self.draw_rect(rect.size, rect.topleft, color, width)
+        self.draw_line = lambda surface, start, end, color, width: pg.draw.line(surface, color, start, end, width=width)
+        self.draw_rect = lambda surface, size, location, color, width: pg.draw.rect(surface, color, pg.Rect(location, size), width=width)
+        self.draw_circle = lambda surface, center, radius, color, width: pg.draw.circle(surface, color, [*map(int, center)], radius, width)
+
     def flip_image(self, key: str, x: bool, y: bool) -> None:
         try:
             image = self.image[key]

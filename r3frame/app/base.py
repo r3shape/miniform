@@ -1,6 +1,8 @@
 from r3frame.globs import pg
 from r3frame.util import abs_path
 
+from r3frame.atom import Atom
+from r3frame.app.proc import Process
 from r3frame.app.scene import Scene
 from r3frame.app.clock import Clock
 from r3frame.app.window import Window
@@ -32,16 +34,26 @@ class Application:
         self.camera: Camera = Camera(self.window)
         self.renderer: Renderer = Renderer(self.camera)
 
+        self.processes: list[Process] = [None for _ in range(100)]
         self.configure()
     
-    def set_state(self, flag: int) -> None:
-        self.state |= flag
+    def _bsort(self) -> None:
+        for _ in range(len(self.processes) - 1, 0, -1):
+            for __ in range(_):
+                if not self.processes[__] or not self.processes[__+1]: continue
+                if self.processes[__].id > self.processes[__+1].id:
+                    t = self.processes[__]
+                    self.processes[__] = self.processes[__+1]
+                    self.processes[__+1] = t
+        
+    def add_proc(self, proc: Process) -> None:
+        if not isinstance(proc, Process): return
+        self.processes[proc.id] = proc
 
-    def get_state(self, flag: int) -> bool:
-        return ((self.state & flag) == flag)
-
-    def rem_state(self, flag: int) -> None:
-        self.state &= ~flag
+    def rem_proc(self, pid: int) -> None:
+        try:
+            self.processes.pop(pid)
+        except IndexError: pass
 
     def set_scene(self, scene: Scene) -> None:
         self.scenes[scene.name] = scene

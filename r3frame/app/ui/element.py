@@ -1,10 +1,17 @@
+from r3frame.atom import Atom
 from r3frame.globs import os, pg
 from r3frame.util import abs_path
 from r3frame.app.input import Mouse
 from r3frame.util import point_inside
 
+class ELEMENT_STATE:
+    FILL: int = (1 << 0)
+    HOVERED: int = (1 << 1)
+    SHOW_TEXT: int = (1 << 2)
+    SHOW_BORDER: int = (1 << 3)
+
 # ------------------------------------------------------------ #
-class Element:
+class Element(Atom):
     def __init__(
             self, text: str="Element",
             size: list[int]=[64, 64], color: list[int]=[0, 0, 0],
@@ -13,21 +20,20 @@ class Element:
             text_color: list[int]=[255, 255, 255],
             font_path: str=abs_path("assets/fonts/megamax.ttf")
         ) -> None:
-        self.hovered = False
-        self.show_text = True
-        self.show_border = False
-
+        super().__init__(0, 0)
+        
         self.size = size
         self.location = location
+        
+        self.image_offset = [0, 0]
         self.image = pg.Surface(size)
+        self.color: list[int] = color
 
         self.elements: dict[str, Element] = {}
-        
-        self.offset = [0, 0]
-        self.color: list[int] = color
         self.padding: list[int] = padding
 
         self.border_size = [1, 1]
+        self.border_offset = [0, 0]
         self.border_radius = [0, 0, 0, 0]
         self.border_color = [255, 255, 255]
 
@@ -38,6 +44,8 @@ class Element:
 
         self.font_path = font_path
         self.font: pg.Font = pg.Font(font_path, self.text_size)
+
+        self.set_state(ELEMENT_STATE.FILL|ELEMENT_STATE.SHOW_TEXT)
     
     def load_font(self, font_path: str) -> None:
         if not isinstance(font_path, str) or not os.path.exists(font_path): return
@@ -65,30 +73,31 @@ class Element:
 
     def border(self) -> pg.Rect:
         return pg.Rect(
-            [(self.location[0] + self.offset[0]) - self.border_size[0],
-             (self.location[1] + self.offset[1]) - self.border_size[1],], 
+            [(self.location[0] + self.border_offset[0]) - self.border_size[0],
+             (self.location[1] + self.border_offset[1]) - self.border_size[1],], 
             [self.size[0] + self.border_size[0],
              self.size[1] + self.border_size[1],]
         )
 
     def render(self, surface: pg.Surface) -> None: 
-        self.image.fill(self.color)
+        if self.get_state(ELEMENT_STATE.FILL):
+            self.image.fill(self.color)
         
-        if self.show_text:
+        if self.get_state(ELEMENT_STATE.SHOW_TEXT):
             self.image.blit(
                 self.font.render(self.text, True, self.text_color, self.color),
                 [self.text_location[0] + self.padding[0], self.text_location[1] + self.padding[1]]
             )
 
         surface.blit(self.image, [
-            self.location[0] + self.offset[0],
-            self.location[1] + self.offset[1]
+            self.location[0] + self.image_offset[0],
+            self.location[1] + self.image_offset[1]
         ])
         
         for element in self.elements.values():    # render elements
             element.render(surface)
         
-        if self.show_border:
+        if self.get_state(ELEMENT_STATE.SHOW_BORDER):
             pg.draw.rect(
             surface=surface, color=self.border_color,
             rect=self.border(), width=self.border_size[0],
@@ -105,15 +114,15 @@ class Element:
                 element.location[0] - element.border_size[0], element.location[1] - element.border_size[1],
                 element.size[0] + element.border_size[0], element.size[1] + element.border_size[1]
             ])
-            if not element.hovered and mouse_within:
+            if not element.get_state(ELEMENT_STATE.HOVERED) and mouse_within:
                 Mouse.Hovering = Element
-                element.hovered = True
+                element.set_state(ELEMENT_STATE.HOVERED)
                 element.on_hover()
-            if element.hovered and not mouse_within:
+            if element.get_state(ELEMENT_STATE.HOVERED) and not mouse_within:
                 Mouse.Hovering = None
-                element.hovered = False
+                element.rem_state(ELEMENT_STATE.HOVERED)
                 element.on_unhover()
-            if element.hovered and event_manager.mouse_pressed(Mouse.LeftClick):
+            if element.get_state(ELEMENT_STATE.HOVERED) and event_manager.mouse_pressed(Mouse.LeftClick):
                 event_manager.mouse[Mouse.LeftClick] = 0    # shouldnt need this but fixes the element double-click issue :|
                 element.on_click()
 # ------------------------------------------------------------ #

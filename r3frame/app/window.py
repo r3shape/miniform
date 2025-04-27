@@ -11,12 +11,10 @@ class Window:
         self.display_size = display_size
         self.window = pg.display.set_mode(size)
         
+        self.blit_rect = lambda rect, color, width: self.draw_rect(rect.size, rect.topleft, color, width)
         self.draw_line = lambda start, end, color, width: pg.draw.line(self.display, color, start, end, width=width)
         self.draw_rect = lambda size, location, color, width: pg.draw.rect(self.display, color, pg.Rect(location, size), width=width)
         self.draw_circle = lambda center, radius, color, width: pg.draw.circle(self.display, color, [*map(int, center)], radius, width)
-        
-        self.blit_rect = lambda rect, color, width: self.draw_rect(rect.size, rect.topleft, color, width)
-
         self.configure(display_size)
 
     def set_title(self, title: str) -> None:

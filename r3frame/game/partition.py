@@ -16,7 +16,7 @@ class StaticPartition:
         gy = int(location[1]) // self.cellsize
         if gx < 0 or gy < 0 or gx > self.size[0] or gy > self.size[1]: return
         index = gy * self.width + gx
-        if index > len(self.cells): return
+        if index >= len(self.cells): return
         return self.cells[index]
     
     def set_cell(self, obj) -> None:
@@ -24,21 +24,19 @@ class StaticPartition:
         if isinstance(obj, list):
             for o in obj:
                 if o is None: continue
-                cell = self.get_cell(o.location)
-                if cell is None: return
+                cell = self.get_cell(o.pos)
+                if cell is None or o in cell: return
                 self.objs.append(o)
                 cell.append(o)
         else:
-            cell = self.get_cell(obj.location)
-            if cell is None: return
+            cell = self.get_cell(obj.pos)
+            if cell is None or obj in cell: return
             self.objs.append(obj)
             cell.append(obj)
 
     def rem_cell(self, obj) -> None:
         """Removes and an object from the grid at the given world (pixel) position."""
-        x, y = obj.location
-        if x < 0 or x >= self.size[0] or y < 0 or y >= self.size[1]: return
-        cell = self.get_cell([x, y])
+        cell = self.get_cell(obj.pos)
         if cell is None: return
         self.objs.remove(obj)
         cell.remove(obj)
@@ -53,13 +51,28 @@ class StaticPartition:
                 region.append([x, y])
         return region
     
+    def get_area(self, topleft:list[int], bottomright:list[int]) -> list[list[int]]:
+        start = [
+            int(topleft[0]) // self.cellsize,
+            int(topleft[1]) // self.cellsize
+        ]; end = [
+            int(bottomright[0]) // self.cellsize,
+            int(bottomright[1]) // self.cellsize
+        ]; cells = []
+        for x in range(start[0], end[0]):
+            for y in range(start[1], end[1]):
+                cell = self.cells[y * self.size[0] + x]
+                if cell:
+                    cells.append(cell)
+        return [o for cell in cells for o in cell if cell]
+
     def get_region(self, size:list[int], location:list[int]) -> list|None:
         region = self._generate_region(size, location)
         if not region: return None
         cells = []
         for map_location in region:
             index = map_location[1] * self.size[0] + map_location[0]
-            if index > len(self.cells): continue
+            if index >= len(self.cells): continue
             cell = self.cells[index]
             if cell: cells.append(cell)
         return cells
@@ -86,7 +99,7 @@ class StaticPartition:
 
         # draw objects within the visible region
         for obj in self.objs:
-            x, y = obj.center()
+            x, y = obj.center
             gx = x // self.cellsize
             gy = y // self.cellsize
             if start_x <= gx <= end_x and start_y <= gy <= end_y:

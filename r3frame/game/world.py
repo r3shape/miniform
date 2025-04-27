@@ -24,7 +24,7 @@ class Tilemap(Object):
 
         self.grid_color: list[int] = grid_color
 
-        super().__init__(self.sizep, [255, 255, 255], [0, 0], 1000)
+        super().__init__([0, 0], self.sizep, [255, 255, 255])
 
     def export_image(self, name: str, path: str, grid: bool=False) -> None:
         if not os.path.exists(path): return False

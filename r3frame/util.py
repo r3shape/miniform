@@ -49,12 +49,18 @@ This function simulates a linear friction effect by reducing `x` by a constant a
 - Ensures the value stops completely when it gets close to 0.
 """
 
+# ------------------------------------------------------------ #
+div_v2 = lambda v, s: [v[0] / s, v[1] / s]
+dist_v2 = lambda a, b: mag_v2(sub_v2(a, b))
+scale_v2 = lambda v, s: [v[0] * s, v[1] * s]
+mag_v2 = lambda v: (v[0]**2 + v[1]**2) ** 0.5
+add_v2 = lambda a, b: [a[0] + b[0], a[1] + b[1]]
+sub_v2 = lambda a, b: [a[0] - b[0], a[1] - b[1]]
+clamp = lambda v, l, u: l if v < l else u if v > u else v
+norm_v2 = lambda v: [v[0] / mag_v2(v), v[1] / mag_v2(v)] if mag_v2(v) != 0 else [0, 0]
 equal_arrays = lambda a, b: all([*map(lambda a, b: a == b, a, b)])
 unequal_arrays = lambda a, b: all([*map(lambda a, b: a != b, a, b)])
-
-def _asset_path(path: str) -> str:
-    path = path.replace("/", os.sep).replace("\\", os.sep)
-    return f"{__file__.removesuffix("util.py")}assets{os.sep}{path}"
+# ------------------------------------------------------------ #
 
 def abs_path(path: str) -> str:
     fp = __file__.split(os.sep)
@@ -72,20 +78,12 @@ def point_inside(point: list[int|float], bounds: list[int|float]) -> bool:
         point[0] > bounds[0] and point[0] < bounds[0] + bounds[2] \
     and point[1] > bounds[1] and point[1] < bounds[1] + bounds[3]
 
-def dist_to(from_point: list[int|float], to_point: list[int|float]) -> list[float]:
-    """Calculates a distance vector from two points."""
-    return [
-        to_point[0] - from_point[0],
-        to_point[1] - from_point[1]
-    ]
-
 def angle_to(from_point: list[int|float], to_point: list[int|float]) -> float:
     """Calculates the angle (in degrees) between two points."""
     return math.degrees(math.atan2(*[
         to_point[0] - from_point[0],
         to_point[1] - from_point[1]
     ])) 
-
 
 def bsort(data: list[int]) -> list[int]:
     for i in range(len(data)-1, 0, -1):
