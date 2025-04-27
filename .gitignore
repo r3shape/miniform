@@ -5,4 +5,3 @@
 *.egg-info/
 
 test.py
-setup.py
