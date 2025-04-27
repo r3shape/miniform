@@ -4,8 +4,8 @@
 
 <br><br>
 
-![Version](https://img.shields.io/pypi/v/BLAKBOX?style=for-the-badge&logo=pypi&logoColor=white&label=BLAKBOX&labelColor=black&color=white&link=https%3A%2F%2Fpypi.org%2Fproject%2FBLAKBOX%2F2025.0.2%2F)
-![Version](https://img.shields.io/pypi/v/NIGHTBOX?style=for-the-badge&logo=pypi&logoColor=white&label=NIGHTBOX&labelColor=black&color=white&link=https%3A%2F%2Fpypi.org%2Fproject%2FNIGHTBOX%2F2025.0.2%2F)
+![Version](https://img.shields.io/pypi/v/BLAKBOX?style=for-the-badge&logo=pypi&logoColor=white&label=BLAKBOX&labelColor=black&color=white&link=https%3A%2F%2Fpypi.org%2Fproject%2FBLAKBOX%2F2025.0.2%2F) 
+![Version](https://img.shields.io/pypi/v/NIGHTBOX?style=for-the-badge&logo=pypi&logoColor=white&label=NIGHTBOX&labelColor=black&color=white&link=https%3A%2F%2Fpypi.org%2Fproject%2FNIGHTBOX%2F2025.0.2%2F)  
 ![GitHub Stars](https://img.shields.io/github/stars/r3shape/BLAKBOX?style=for-the-badge&label=stars&labelColor=black&color=white)
 ![License](https://img.shields.io/badge/mit-badge?style=for-the-badge&logo=mit&logoColor=white&label=License&labelColor=black&color=white)
 
