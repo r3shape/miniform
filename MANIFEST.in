@@ -1,1 +1,2 @@
-include r3frame/assets/*
+include blakbox/assets/fonts/*
+include blakbox/assets/images/*

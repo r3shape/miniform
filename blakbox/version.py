@@ -1,0 +1,3 @@
+BLAKBOX_YEAR: int = 2025
+BLAKBOX_MINOR: int = 0
+BLAKBOX_PATCH: int = 1
