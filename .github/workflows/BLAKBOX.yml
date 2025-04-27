@@ -1,9 +1,9 @@
-name: NIGHTBOX-Release
+name: BLAKBOX-Release
 
 on:
   push:
     tags:
-      - 'NIGHTBOX-v*'  # push a tag like NIGHTBOX-v2025.1.0
+      - 'BLAKBOX-v*'  # push a tag like BLAKBOX-v2025.1.0
   workflow_dispatch: # allow manual runs
 
 jobs:
@@ -26,7 +26,7 @@ jobs:
 
     - name: Build the package
       run: |
-        python NIGHTBOX.setup.py sdist bdist_wheel
+        python BLAKBOX.setup.py sdist bdist_wheel
 
     - name: Publish to PyPI
       env:
