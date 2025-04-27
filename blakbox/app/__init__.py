@@ -10,4 +10,3 @@ from blakbox.app.scene import Scene
 from blakbox.app.base import Application
 
 import blakbox.app.ui as ui
-import blakbox.app.resource as resource

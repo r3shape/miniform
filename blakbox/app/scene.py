@@ -1,7 +1,7 @@
 from blakbox.globs import pg
 from blakbox.util import abs_path, scale_v2
 from blakbox.app.ui.base import Interface
-from blakbox.game import Tilemap, StaticPartition
+from blakbox.game.world import Tilemap, StaticPartition
 
 # ------------------------------------------------------------ #
 class Scene:
@@ -30,7 +30,6 @@ class Scene:
             text_color=[0, 0, 0],
             text_size=24,
         )
-
 
         self.world_size: list[int] = world_size
         self.world_cellsize: int = world_cellsize

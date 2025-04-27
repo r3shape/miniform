@@ -3,8 +3,8 @@ from blakbox.util import scale_v2
 from blakbox.atom import Atom
 from blakbox.app.window import Window
 from blakbox.app.camera import Camera
-from blakbox.app.resource.image import Image
-from blakbox.app.resource.surfmap import SurfMap
+from blakbox.game.resource import Image, Animation
+from blakbox.game.resource.surfmap import SurfMap
 
 # ------------------------------------------------------------ #
 class Renderer(Atom):
@@ -22,7 +22,7 @@ class Renderer(Atom):
     def pre_render(self) -> None:   pass
     def post_render(self) -> None:  pass
 
-    def draw_call(self, image: Image, surfid: int=None, pos: list[int]=[0, 0]) -> None:
+    def draw_call(self, image: Image|Animation, pos: list[int]) -> None:
         """
         Queues a draw call for rendering.
 
@@ -41,12 +41,7 @@ class Renderer(Atom):
              pos[1] + self.window.clip_range[1] > self.camera.pos[1] + self.camera.bounds[1]):
             return
         
-        if isinstance(surfid, int):
-            image.set_colorkey([1, 1, 1])
-            image.fill([1, 1, 1])
-            self.surfmap.blit(surfid, image, [0, 0])
-
-        self._draw_calls.append([image, pos])
+        self._draw_calls.append([pos[1], image, pos])
         self.draw_calls += 1
 
     def render(self) -> None:
@@ -55,9 +50,13 @@ class Renderer(Atom):
         self.window.fill()
 
         self.pre_render()
+        self._draw_calls.sort(key=lambda call: call.pop(0))
         for i in range(self.draw_calls):
             image, pos = self._draw_calls.pop(0)
-            self.window.blit(image, pos)
+            if isinstance(image, Image) or isinstance(image, Animation):
+                self.surfmap.blit(image.id, self.window.display, pos, frame_data=image.frame_data)
+            else:
+                self.window.blit(image, pos)
         self.draw_calls = 0
         self.post_render()
 
@@ -67,9 +66,5 @@ class Renderer(Atom):
         
         # apply camera transformations at the render-target level (no per-object transformations)
         self.target.blit(self.window.display, self.camera.offset)
-        self.window.screen.blit(
-            pg.transform.scale(self.target, self.window.screen_size),
-            [0, 0]
-        )
-        del self.target
+        self.window.screen.blit(dest=[0, 0], source=pg.transform.scale(self.target, self.window.screen_size))
 # ------------------------------------------------------------ #

@@ -1,5 +1,6 @@
 from blakbox.globs import pg
 
+# TODO: this class could handle scene serialization to JSON \(OoO)/
 # ------------------------------------------------------------ #
 class StaticPartition:
     def __init__(self, size: list[int], cellsize: int) -> None:

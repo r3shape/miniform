@@ -1,5 +1,5 @@
 from blakbox.globs import os, re, pg, json, random
-from blakbox.app.resource.image import Image
+from blakbox.game.resource.image import Image
 from blakbox.game.obj import Object
 
 # ------------------------------------------------------------ #

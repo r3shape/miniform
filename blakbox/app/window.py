@@ -13,7 +13,6 @@ class Window(Atom):
             clear_color: list[int],
             ) -> None:
         super().__init__(0, 0)
-        self.zoom: float = 1.0
         self.icon: pg.Surface = None
         self.title: str = "BlakWindow"
         self.display = pg.Surface(display_size)
@@ -36,9 +35,6 @@ class Window(Atom):
     def mod_display(self, display_size: list[int]) -> None:
         self.display_size = display_size
         self.display = pg.Surface(display_size)
-
-    def mod_zoom(self, delta: float) -> None:
-        self.zoom = clamp(self.zoom + delta, 1, 3.5)
     
     def fill(self) -> None:
         self.screen.fill(self.clear_color)

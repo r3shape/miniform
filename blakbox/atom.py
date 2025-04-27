@@ -17,4 +17,10 @@ class Atom:
 
     def rem_state(self, flag: int) -> None:
         self._data[1] &= ~flag
+
+    def sizeof(self) -> int:
+        return self.__sizeof__()
+
+    def copy(self) -> 'Atom':
+        return self.__new__(Atom)
 # ------------------------------------------------------------ #

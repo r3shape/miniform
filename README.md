@@ -15,7 +15,7 @@
 # BLAKBOX
 
 ## What?
-**BLAKBOX** is a game development framework designed to help developers create games with **more speed and less hassle**. It provides a structured foundation for handling scenes, objects, UI, input, and rendering, so you can focus on making games instead of reinventing the wheel.
+**BLAKBOX** is a game development framework designed to help developers **create more with less hassle**. It provides a structured foundation for handling scenes, objects, UI, input, and rendering, so you can focus on making games instead of reinventing the wheel.
 
 ## Why?
 - **Save Time** – No need to build a game structure from scratch.

@@ -1,5 +1,5 @@
 from blakbox.globs import pg
-from blakbox.app.resource.image import Image
+from blakbox.game.resource.image import Image
 
 # ------------------------------------------------------------ #
 class Keyboard:

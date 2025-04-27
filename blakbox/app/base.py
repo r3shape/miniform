@@ -10,9 +10,8 @@ from blakbox.app.camera import Camera
 from blakbox.app.renderer import Renderer
 from blakbox.app.event import EventManager
 from blakbox.app.input import Keyboard, Mouse
-from blakbox.app.resource.image import Image
-from blakbox.app.resource.surfmap import SurfMap
-from blakbox.app.resource.manager import ResourceManager
+from blakbox.game.resource.image import Image
+from blakbox.game.resource.surfmap import SurfMap
 
 # ------------------------------------------------------------ #
 class Application:
@@ -22,7 +21,6 @@ class Application:
         self.clock: Clock = Clock()
         self.events: EventManager = EventManager()
         self.surfmap: SurfMap = SurfMap(window_size)
-        self.resource: ResourceManager = ResourceManager()
 
         self.scene: str = None
         self.scene: Scene = None
