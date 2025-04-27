@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://github.com/r3shape/BLAKBOX/blob/NIGHTBOX/blakbox/assets/images/logo-5x.png" alt="BLAKBOX Logo"/>
+<img src="https://github.com/r3shape/BLAKBOX/blob/NIGHTBOX/blakbox/assets/images/logo-5x.gif" alt="BLAKBOX Logo"/>
 
 <br><br>
 
