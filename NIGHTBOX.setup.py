@@ -1,6 +1,6 @@
 import setuptools
 
-version = [2025, 0, 1]
+version = [2025, 0, 2]
 setuptools.setup(
     name='NIGHTBOX',
     version=f'{version[0]}.{version[1]}.{version[2]}',

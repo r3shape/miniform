@@ -2,7 +2,7 @@ import setuptools
 
 version = [2025, 0, 1]
 setuptools.setup(
-    name='NIGHTBOX',
+    name='BLAKBOX',
     version=f'{version[0]}.{version[1]}.{version[2]}',
     description='Reach Inside The Box...',
     long_description=open('README.md').read(),
