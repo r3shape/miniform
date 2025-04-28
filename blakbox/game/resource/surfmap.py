@@ -9,6 +9,7 @@ class SurfMap(Object):
         super().__init__([0, 0], size, [1, 1, 1])
         self.mod_colorkey([1, 1, 1])
         self.fill()
+        self.padding: list[int] = [0, 0]
         self.surf_data: list[tuple[list[int], list[int]]] = []
 
     def load_surface(self, size: list[int], path: str, frame_layout: list[int]=[1, 1]) -> int:
@@ -20,13 +21,16 @@ class SurfMap(Object):
         if self.pos[0] + w >= self.size[0]:
             self.pos[0] = 0
             if self.pos[1] + h + self.surf_data[surfid-1][1][1] > self.size[1]: return
-            self.pos[1] += (h + self.surf_data[surfid-1][1][1])
+            for p, s in self.surf_data:
+                if h < s[1]:
+                    h = s[1]
+            self.pos[1] += h
 
         self.image.blit(surface, self.pos)
         del surface
 
         self.surf_data.append([self.pos[:], size[:]])
-        self.pos[0] += w  # move right for next texture
+        self.pos[0] += w
         return surfid
 
     def unload_surface(self, surfid: int) -> None:
