@@ -43,7 +43,7 @@ class Object(Atom):
     def mod_colorkey(self, color: list[int]) -> None:
         self.image.set_colorkey(color)
 
-    def set_velocity(self, vx: float=0.0, vy: float=0.0) -> None:
+    def mod_velocity(self, vx: float=0.0, vy: float=0.0) -> None:
         self.velocity[0] = vx if vx else self.velocity[0]
         self.velocity[1] = vy if vy else self.velocity[1]
 
