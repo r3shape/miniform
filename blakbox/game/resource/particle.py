@@ -34,7 +34,7 @@ class ParticleSystem:
         for r, s, l, p, c, dr, sr in self.spawners:
             for _ in range(r):
                 x, y = p
-                lifetime = random.uniform(0, l)
+                lifetime = random.uniform(1 * 0.4, l)
                 speed = random.uniform(s//4, s)
                 direction = random.uniform(dr[0], dr[1])
                 dx = speed * math.cos(direction)

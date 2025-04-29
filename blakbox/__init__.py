@@ -1,6 +1,7 @@
 import blakbox.app as app
 import blakbox.game as game
 import blakbox.util as util
+from blakbox.atom import Atom
 import blakbox.version as version
 import blakbox.quotes as quotes
 

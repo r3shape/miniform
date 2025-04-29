@@ -1,5 +1,5 @@
+from blakbox.util import add_v2
 from blakbox.globs import pg
-from blakbox.util import scale_v2
 from blakbox.atom import Atom
 from blakbox.app.window import Window
 from blakbox.app.camera import Camera
@@ -22,7 +22,7 @@ class Renderer(Atom):
     def pre_render(self) -> None:   pass
     def post_render(self) -> None:  pass
 
-    def draw_call(self, image: Image|Animation, pos: list[int]) -> None:
+    def draw_call(self, image: Image|Animation, pos: list[int], offset: list[int]=[0, 0]) -> None:
         """
         Queues a draw call for rendering.
 
@@ -41,18 +41,19 @@ class Renderer(Atom):
              pos[1] + self.window.clip_range[1] > self.camera.pos[1] + self.camera.bounds[1]):
             return
         
-        self._draw_calls.append([pos[1], image, pos])
+        self._draw_calls.append([pos[1], image, pos, offset])
         self.draw_calls += 1
 
     def render(self) -> None:
+        self._draw_calls.sort(key=lambda call: call[0])
         self.target = pg.Surface(self.camera.viewport_size)  # create a surface matching the viewport size.
         self.target.fill(self.window.clear_color)
         self.window.fill()
 
         self.pre_render()
-        self._draw_calls.sort(key=lambda call: call.pop(0))
         for i in range(self.draw_calls):
-            image, pos = self._draw_calls.pop(0)
+            _, image, pos, offset = self._draw_calls.pop(0)
+            pos = add_v2(pos, offset)
             if isinstance(image, Image) or isinstance(image, Animation):
                 self.surfmap.blit(image.id, self.window.display, pos, frame_data=image.frame_data)
             else:

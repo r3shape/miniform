@@ -1,5 +1,6 @@
 from blakbox.globs import pg
 from blakbox.game.resource.image import Image
+from blakbox.game.resource.animation import Animation
 
 # ------------------------------------------------------------ #
 class Keyboard:
@@ -155,5 +156,12 @@ class Mouse:
 
     class cursor:
         image: Image = None
-        visible = lambda flag: pg.mouse.set_visible(flag)
+        
+        @staticmethod
+        def visible(flag: bool) -> None:
+            pg.mouse.set_visible(flag)
+        @staticmethod
+        def update(dt: float) -> None:
+            if isinstance(Mouse.cursor.image, Animation):
+                Mouse.cursor.image.update(dt)
 # ------------------------------------------------------------ #

@@ -92,18 +92,18 @@ class StaticPartition:
         # draw grid lines within the region
         for gx in range(start_x, end_x):
             x = gx * cell_w
-            renderer.window.draw_line([x, start_y * cell_h], [x, end_y * cell_h], [125, 125, 125], 1)
+            renderer.window.draw_line([x, start_y * cell_h], [x, end_y * cell_h], color=[255, 255, 255], width=1)
         
         for gy in range(start_y, end_y):
             y = gy * cell_h
-            renderer.window.draw_line([start_x * cell_w, y], [end_x * cell_w, y], [125, 125, 125], 1)
+            renderer.window.draw_line([start_x * cell_w, y], [end_x * cell_w, y], color=[255, 255, 255], width=1)
 
         # draw objects within the visible region
         for obj in self.objs:
-            x, y = obj.center()
+            x, y = obj.center
             gx = x // self.cellsize
             gy = y // self.cellsize
             if start_x <= gx <= end_x and start_y <= gy <= end_y:
                 obj_x, obj_y = gx * cell_w, gy * cell_h
-                renderer.window.draw_circle([obj_x + self.cellsize / 2, obj_y + self.cellsize / 2], self.cellsize, [0, 255, 0], 1)
+                renderer.window.draw_circle(self.cellsize, [obj_x + self.cellsize / 2, obj_y + self.cellsize / 2], color=[0, 255, 0], width=1)
 # ------------------------------------------------------------ #

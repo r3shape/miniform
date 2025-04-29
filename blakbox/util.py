@@ -49,6 +49,22 @@ This function simulates a linear friction effect by reducing `x` by a constant a
 - Ensures the value stops completely when it gets close to 0.
 """
 
+damp_linc = lambda c, x, rate, threshold, dt: c if abs(x) < threshold else x - rate * dt * (1 if x > c else -1)
+"""
+@brief Applies linear damping to reduce a value at a fixed rate over time.
+@param c: The custom value to be dampened to.
+@param x: The value to be damped (e.g., velocity).
+@param rate: The amount to reduce per second.
+@param threshold: The stopping threshold (if |x| < threshold, it snaps to 0).
+@param dt: Delta time (time step for decay application).
+
+@details
+This function simulates a linear friction effect by reducing `x` by a constant amount:
+    x_new = x - rate * dt * sign(x)
+- Good for simulating dry friction, velocity decay, or gradual slowdowns.
+- Ensures the value stops completely when it gets close to 0.
+"""
+
 # ------------------------------------------------------------ #
 div_v2 = lambda v, s: [v[0] / s, v[1] / s]
 dist_v2 = lambda a, b: mag_v2(sub_v2(a, b))

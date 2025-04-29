@@ -12,6 +12,7 @@ from blakbox.app.event import EventManager
 from blakbox.app.input import Keyboard, Mouse
 from blakbox.game.resource.image import Image
 from blakbox.game.resource.surfmap import SurfMap
+from blakbox.game.resource.animation import Animation
 
 # ------------------------------------------------------------ #
 class Application:
@@ -85,14 +86,15 @@ class Application:
                 self.scene.interface.update(self.events)
                 self.handle_update()
                 self.camera.update(self.clock.delta)
+                Mouse.cursor.update(self.clock.delta)
 
                 self.scene.handle_render()
                 self.handle_render()
                 self.renderer.render()
                 self.scene.interface.render()
                 
-                if isinstance(Mouse.cursor.image, Image):
-                    self.window.window.blit(Mouse.cursor.image.data, Mouse.pos.screen)
+                if isinstance(Mouse.cursor.image, (Image, Animation)):
+                    self.surfmap.blit(Mouse.cursor.image.id, self.window.screen, Mouse.pos.screen, frame_data=Mouse.cursor.image.frame_data)
 
                 Mouse.pos.world = scale_v2(div_v2(Mouse.pos.view, self.scene.tilemap.tilesize), self.scene.tilemap.tilesize)
             else:
@@ -100,11 +102,12 @@ class Application:
 
                 self.handle_update()
                 self.camera.update(self.clock.delta)
+                Mouse.cursor.update(self.clock.delta)
 
                 self.handle_render()
                 self.renderer.render()
-                if isinstance(Mouse.cursor.image, Image):
-                    self.window.window.blit(Mouse.cursor.image.data, Mouse.pos.screen)
+                if isinstance(Mouse.cursor.image, (Image, Animation)):
+                    self.surfmap.blit(Mouse.cursor.image.id, self.window.screen, Mouse.pos.screen, frame_data=Mouse.cursor.image.frame_data)
 
             Mouse.pos.rel = pg.mouse.get_rel()
             Mouse.pos.screen = pg.mouse.get_pos()
