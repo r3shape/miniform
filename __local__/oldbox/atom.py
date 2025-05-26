@@ -1,15 +1,11 @@
 
 # ------------------------------------------------------------ #
-class BOXatom:
+class Atom:
     def __init__(self, aid: int, flags: int) -> None:
         self._data = [aid, flags]
 
     @property
     def id(self) -> int:    return self._data[0]
-
-    @id.setter
-    def id(self, id:int) -> None:   self._data[0] = id
-
     @property
     def flags(self) -> int: return self._data[1]
 
@@ -25,6 +21,6 @@ class BOXatom:
     def sizeof(self) -> int:
         return self.__sizeof__()
 
-    def copy(self) -> 'BOXatom':
-        return BOXatom(self.id, self.flags)
+    def copy(self) -> 'Atom':
+        return self.__new__(Atom)
 # ------------------------------------------------------------ #

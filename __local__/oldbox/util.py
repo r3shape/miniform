@@ -1,5 +1,4 @@
-import os, math
-
+from oldbox.globs import os, math
 
 sine_wave_value = lambda A, B, t, C, D: int(A * math.sin((B * t) + C) + D)
 """
@@ -68,19 +67,16 @@ This function simulates a linear friction effect by reducing `x` by a constant a
 
 # ------------------------------------------------------------ #
 div_v2 = lambda v, s: [v[0] / s, v[1] / s]
-div_v2i = lambda v, s: [v[0] // s, v[1] // s]
-div2_v2 = lambda a, b: [a[0] / b[0], a[1] / b[1]]
-div2_v2i = lambda a, b: [a[0] // b[0], a[1] // b[1]]
 dist_v2 = lambda a, b: mag_v2(sub_v2(a, b))
 scale_v2 = lambda v, s: [v[0] * s, v[1] * s]
-mag_v2 = lambda v: (v[0]**2 + v[1]**2) ** 0.5
 mul_v2 = lambda v, s: [v[0] * s[0], v[1] * s[1]]
+mag_v2 = lambda v: (v[0]**2 + v[1]**2) ** 0.5
 add_v2 = lambda a, b: [a[0] + b[0], a[1] + b[1]]
 sub_v2 = lambda a, b: [a[0] - b[0], a[1] - b[1]]
 clamp = lambda v, l, u: l if v < l else u if v > u else v
+norm_v2 = lambda v: [v[0] / mag_v2(v), v[1] / mag_v2(v)] if mag_v2(v) != 0 else [0, 0]
 equal_arrays = lambda a, b: all([*map(lambda a, b: a == b, a, b)])
 unequal_arrays = lambda a, b: all([*map(lambda a, b: a != b, a, b)])
-norm_v2 = lambda v: [v[0] / mag_v2(v), v[1] / mag_v2(v)] if mag_v2(v) != 0 else [0, 0]
 # ------------------------------------------------------------ #
 
 def abs_path(path: str) -> str:
@@ -98,6 +94,13 @@ def point_inside(point: list[int|float], bounds: list[int|float]) -> bool:
     return \
         point[0] > bounds[0] and point[0] < bounds[0] + bounds[2] \
     and point[1] > bounds[1] and point[1] < bounds[1] + bounds[3]
+
+def angle_to(from_point: list[int|float], to_point: list[int|float]) -> float:
+    """Calculates the angle (in degrees) between two points."""
+    return math.degrees(math.atan2(*[
+        to_point[0] - from_point[0],
+        to_point[1] - from_point[1]
+    ])) 
 
 def bsort(data: list[int]) -> list[int]:
     for i in range(len(data)-1, 0, -1):
