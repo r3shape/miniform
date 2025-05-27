@@ -64,7 +64,7 @@ if __name__ == "__main__":
 ```
 | NOTE: The methods `configure()`, `cleanup()`, `handle_events()` and `handle_update()` must be defined for any instance of `BOXapplication`.
 
-Above is the minimal code needed to get `BOXapplication` up and running. From here you can explore the `BOXscene` and the other classes provided in `blackbox.app.resource` and `blakbox.app.ui`.
+Above is the minimal code needed to get `BOXapplication` up and running. From here you can explore the `BOXscene` and the other classes provided in `blakbox.app.resource` and `blakbox.app.ui`.
 
 Check out the `blakbox/examples` directory to get a look at some "real world" use cases for the library, maybe even kickstart your next project.
 
