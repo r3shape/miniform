@@ -1,8 +1,9 @@
 *.bat
 *dist/
+*build/
 *tests/
+*__local__/
 *__pycache__/
 *.egg-info/
 
 test.py
-setup.py

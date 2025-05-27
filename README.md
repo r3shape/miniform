@@ -1,95 +1,82 @@
-![logo](https://github.com/r3shape/r3engine/blob/main/r3engine/assets/r3-sticker.png?raw=true)  
-![PyPi Package version](https://img.shields.io/pypi/v/r3frame?style=for-the-badge&logo=pypi&logoColor=white&label=r3frame&labelColor=black&color=white&link=https%3A%2F%2Fpypi.org%2Fproject%2Fr3frame%2F2025.0.2%2F
-)  
-![GitHub Stars](https://img.shields.io/github/stars/r3shape/r3frame?style=for-the-badge&label=stars&labelColor=black&color=white)
-![License](https://img.shields.io/badge/mit-badge?style=for-the-badge&logo=mit&logoColor=white&label=License&labelColor=black&color=white)
+<div align="center">
 
-## What is r3frame?  
-**r3frame** is a game development framework designed to help developers create games with **more speed and less hassle**. It provides a structured foundation for handling scenes, objects, UI, input, and rendering, so you can focus on making games instead of reinventing the wheel.  
+<img src="https://github.com/r3shape/BLAKBOX/blob/NIGHTBOX/blakbox/assets/images/logo-5x.gif?raw=true" alt="BLAKBOX Logo"/>
 
-## Why Use r3frame?  
-- **Save Time** – No need to build a game structure from scratch.  
-- **Better Organization** – Scenes, assets, and objects are neatly managed.  
-- **Pygame, but Better** – All the flexibility of Pygame, with added convenience.  
+<br><br>
 
-## Features  
-- **Modularity** – Manage your game with a clean and modular API.  
-- **Scene & Object Management** – Easily define and switch between game scenes.  
-- **Custom UI System** – Buttons, text fields, and interface-scripting made simple.  
-- **Asset Loading** – Load images and sprite sheets efficiently.  
-- **Input Handling** – Keyboard and mouse events with built-in support.  
-- **Partitioning Systems** – Efficient object management for game worlds of many sizes.  
+![Version](https://img.shields.io/pypi/v/BLAKBOX?style=for-the-badge&logo=pypi&logoColor=white&label=BLAKBOX&labelColor=black&color=white&link=https%3A%2F%2Fpypi.org%2Fproject%2FBLAKBOX%2F2025.0.2%2F) 
+![Version](https://img.shields.io/pypi/v/NIGHTBOX?style=for-the-badge&logo=pypi&logoColor=white&label=NIGHTBOX&labelColor=black&color=white&link=https%3A%2F%2Fpypi.org%2Fproject%2FNIGHTBOX%2F2025.0.2%2F)  
+![GitHub Stars](https://img.shields.io/github/stars/r3shape/BLAKBOX?style=for-the-badge&label=stars&labelColor=black&color=white)
+![License](https://img.shields.io/badge/mit-badge?style=for-the-badge&logo=mit&logoColor=white&label=License&labelColor=black&color=white)  
+![Build](https://github.com/r3shape/BLAKBOX/actions/workflows/NIGHTBOX.yml/badge.svg)  
+![Build](https://github.com/r3shape/BLAKBOX/actions/workflows/BLAKBOX.yml/badge.svg)  
 
-## Installation  
-Install **r3frame** via pip:  
+</div>
+
+---
+
+# BLAKBOX
+
+## What?
+**BLAKBOX** is a game development framework designed to help developers **create more with less hassle**. It provides a structured foundation for handling scenes, objects, UI, input, and rendering, so you can focus on making games instead of reinventing the wheel.
+
+## Why?
+- **Save Time** – No need to build a game structure from scratch.
+- **Better Organization** – Scenes, assets, and objects are neatly managed.
+- **Pygame, but Better** – All the flexibility of Pygame, with added convenience.
+
+## Content?
+- **Modularity** – Manage your game with a clean and modular API.
+- **Scene & Object Management** – Easily define and switch between game scenes.
+- **Custom UI System** – Buttons, text fields, and interface-scripting made simple.
+- **Asset Loading** – Load images and sprite sheets efficiently.
+- **Input Handling** – Keyboard and mouse events with built-in support.
+- **Partitioning Systems** – Efficient object management for game worlds of many sizes.
+
+## Download?
+Install **BLAKBOX** via pip:
 
 ```sh
-pip install r3frame
+pip install BLAKBOX
 ```
 
-## r3 Playground  
-Once installed, you can run the **r3frame** playground demo by typing:  
+## Getting Started?
+After youv'e installed `blakbox` go ahead and create a script named `main.py` somwhere and paste in this code:
 
-```sh
-r3playground
-```
-
-This will launch an interactive example that is actively maintained and used to showcase **r3frame**'s capabilities.  
-
-## Quick Start
-Getting started is as simple as the following code:
 ```python
-import r3frame as r3
+import blakbox
 
-class MyGame(r3.app.Application):
-    def __init__(self):
-        super().__init__("My First r3frame Game")
+class MyGame(blakbox.app.BOXapplication):
+    def __init__(self) -> None:
+        super().__init__(
+            name = "My Game",           # initial window title
+            window_size = [800, 600],   # the window itself
+            display_size = [1600, 1200] # the surface "within" the window 
+        )
 
-    def load_scenes(self):
-        self.set_scene(r3.app.scene.Scene("Main Scene", r3.objects.world.Grid_Map(50, 50, 32)))
+    def configure(self):
+        # add our scene
+        self.main_menu = self.add_scene(MainMenu(self))  # this returns an integer ID, representing our scene
+        
+        # we can use that integer ID to select our current scene
+        self.set_scene(self.main_menu)
 
-    def load_assets(self):
-        pass
+    def cleanup(self): pass
+    def handle_events(self): pass
+    def handle_update(self): pass
 
-    def load_objects(self):
-        self.player = r3.objects.game.Game_Object(
-            location=[100, 100], color=[0, 255, 0], size=[16, 16])
-
-    def handle_events(self):
-        if self.events.key_pressed(r3.app.inputs.Keyboard.Escape):
-            self.events.quit = True
-        if self.events.key_held(r3.app.inputs.Keyboard.A):
-            self.player.set_velocity(vx=-self.player.speed)
-        if self.events.key_held(r3.app.inputs.Keyboard.D):
-            self.player.set_velocity(vx=self.player.speed)
-        if self.events.key_held(r3.app.inputs.Keyboard.W):
-            self.player.set_velocity(vy=-self.player.speed)
-        if self.events.key_held(r3.app.inputs.Keyboard.S):
-            self.player.set_velocity(vy=self.player.speed)
-
-    def handle_update(self):
-        self.player.update(self.clock.delta)
-        self.camera.center_on(self.player.size, self.player.location)
-    
-    def handle_render(self):
-        self.renderer.draw_call(self.player.image, self.player.location)
-
-MyGame().run()
+if __name__ == "__main__":
+    MyGame().run()
 ```
+| NOTE: The methods `configure()`, `cleanup()`, `handle_events()` and `handle_update()` must be defined for any instance of `BOXapplication`.
 
-### Lets Take A Closer Look
-r3frame is comprised of multiple sub-modules, all of which provide specific functionality and work together seamlessly.  
-The first thing we do is *subclass* `r3frame.app.Application`. This object is responsible for the overall control-flow of your application. It handles calling update/render methods on all the *app-level* objects such as scenes, interfaces, and resources.  
+Above is the minimal code needed to get `BOXapplication` up and running. From here you can explore the `BOXscene` and the other classes provided in `blackbox.app.resource` and `blakbox.app.ui`.
 
-The methods for loading scenes, assets, and objects are all required to be implemented and will raise a `NotImplementedError` if not found in an instance of `r3frame.app.Application`. The call order internally is (`load_scenes`, `load_assets` `load_objects`), as you first load and configure your game's scenes, then load in your assets, finally creating and configuring your objects in their respective scenes with their respective assets.
+Check out the `blakbox/examples` directory to get a look at some "real world" use cases for the library, maybe even kickstart your next project.
 
-So with that in mind, we create ourselves a player object, and then setup some input handling to respond to some keyboard events. Now the application will handle *app-level* update and render calls, so its up to us to issue them for *game-level* operations. This happens to be fairly straightforward in this example as we update our player and center our camera, then issue a draw call for our player object.
-
-With that we have a simple but easily extendible scene for us to create pretty much anything we'd dare imagine.  
-Though, this world is a bit bland. Try adding some objects of varying colors and sizes to it!
-
-## Contributing  
-Want to help improve **r3frame**? Feel free to contribute by submitting issues, suggesting features, or making pull requests!  
+## Contributions?  
+Want to help improve **BLAKBOX**? Feel free to contribute by submitting issues, suggesting features, or making pull requests!  
 
 ## License  
-**r3frame** is open-source under the **MIT License.**
+**BLAKBOX** is open-source under the **MIT License.**
+</div>
