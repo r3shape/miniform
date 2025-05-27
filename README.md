@@ -54,13 +54,7 @@ class MyGame(blakbox.app.BOXapplication):
             display_size = [1600, 1200] # the surface "within" the window 
         )
 
-    def configure(self):
-        # add our scene
-        self.main_menu = self.add_scene(MainMenu(self))  # this returns an integer ID, representing our scene
-        
-        # we can use that integer ID to select our current scene
-        self.set_scene(self.main_menu)
-
+    def configure(self): pass
     def cleanup(self): pass
     def handle_events(self): pass
     def handle_update(self): pass
