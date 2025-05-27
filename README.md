@@ -40,6 +40,40 @@ Install **BLAKBOX** via pip:
 pip install BLAKBOX
 ```
 
+## Getting Started?
+After youv'e installed `blakbox` go ahead and create a script named `main.py` somwhere and paste in this code:
+
+```python
+import blakbox
+
+class MyGame(blakbox.app.BOXapplication):
+    def __init__(self) -> None:
+        super().__init__(
+            name = "My Game",           # initial window title
+            window_size = [800, 600],   # the window itself
+            display_size = [1600, 1200] # the surface "within" the window 
+        )
+
+    def configure(self):
+        # add our scene
+        self.main_menu = self.add_scene(MainMenu(self))  # this returns an integer ID, representing our scene
+        
+        # we can use that integer ID to select our current scene
+        self.set_scene(self.main_menu)
+
+    def cleanup(self): pass
+    def handle_events(self): pass
+    def handle_update(self): pass
+
+if __name__ == "__main__":
+    MyGame().run()
+```
+| NOTE: The methods `configure()`, `cleanup()`, `handle_events()` and `handle_update()` must be defined for any instance of `BOXapplication`.
+
+Above is the minimal code needed to get `BOXapplication` up and running. From here you can explore the `BOXscene` and the other classes provided in `blackbox.app.resource` and `blakbox.app.ui`.
+
+Check out the `blakbox/examples` directory to get a look at some "real world" use cases for the library, maybe even kickstart your next project.
+
 ## Contributions?  
 Want to help improve **BLAKBOX**? Feel free to contribute by submitting issues, suggesting features, or making pull requests!  
 

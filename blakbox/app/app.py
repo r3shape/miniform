@@ -59,7 +59,7 @@ class BOXapplication:
     def run(self) -> None:
         while not self.events.quit:
             self.clock.tick()
-            self.window.fill()
+            self.window.clear()
             self.events.update()
 
             if isinstance(self.scene, BOXscene):

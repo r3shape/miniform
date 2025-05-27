@@ -44,7 +44,7 @@ class BOXwindow(BOXatom):
         self.display_size = display_size
         self.display = pg.Surface(display_size)
 
-    def fill(self) -> None:
+    def clear(self) -> None:
         self.screen.fill(self.clear_color)
         self.display.fill(self.clear_color)
 

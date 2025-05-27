@@ -2,6 +2,7 @@
 *dist/
 *build/
 *tests/
+*__local__/
 *__pycache__/
 *.egg-info/
 

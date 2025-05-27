@@ -1,12 +1,7 @@
-from blakbox.atom import BOXatom
-from blakbox.app.resource.camera import BOXcamera
-from blakbox.app.ui.interface import BOXinterface
-from blakbox.app.resource.tilemap import BOXtilemap
-from blakbox.app.resource.manager import BOXresources
-from blakbox.app.resource.renderer import BOXrenderer
+import blakbox
 
 # ------------------------------------------------------------ #
-class BOXscene(BOXatom):
+class BOXscene(blakbox.atom.BOXatom):
     def __init__(
             self, app,
             tile_size: list[int] = [32, 32],
@@ -14,12 +9,12 @@ class BOXscene(BOXatom):
             atlas_size: list[int] = [800, 600]
         ) -> None:
         super().__init__(0, 0)
-        self.app = app
-        self.interface: BOXinterface = BOXinterface()
-        self.camera: BOXcamera = BOXcamera(app.window)
-        self.resource: BOXresources = BOXresources(atlas_size)
-        self.tilemap: BOXtilemap = BOXtilemap(self, tile_size, grid_size)
-        self.renderer: BOXrenderer = BOXrenderer(self, app.window, self.camera)
+        self.app: blakbox.app.BOXapplication = app
+        self.interface: blakbox.app.ui.BOXinterface = blakbox.app.ui.BOXinterface()
+        self.camera: blakbox.app.resource.BOXcamera = blakbox.app.resource.BOXcamera(app.window)
+        self.resource: blakbox.app.resource.BOXresources = blakbox.app.resource.BOXresources(atlas_size)
+        self.renderer: blakbox.app.resource.BOXrenderer = blakbox.app.resource.BOXrenderer(self, app.window, self.camera)
+        self.tilemap: blakbox.app.resource.BOXtilemap = blakbox.app.resource.BOXtilemap(self, blakbox.util.scale_v2(tile_size, 2), grid_size)
         
     def cleanup(self) -> None: raise NotImplementedError
     def configure(self) -> None: raise NotImplementedError

@@ -84,7 +84,7 @@ class BOXrenderer(BOXatom):
     def render(self) -> None:
         self.target = pg.Surface(self.camera.viewport_size)  # create a surface matching the viewport size.
         self.target.fill(self.window.clear_color)
-        self.window.fill()
+        self.window.clear()
         
         if self.get_state(RENDERER_FLAG.DEBUG_TILEMAP): self.debug_tilemap()
 
