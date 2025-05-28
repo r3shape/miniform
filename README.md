@@ -69,7 +69,13 @@ Above is the minimal code needed to get `BOXapplication` up and running. From he
 Check out the `blakbox/examples` directory to get a look at some "real world" use cases for the library, maybe even kickstart your next project.
 
 ## Contributions?  
-Want to help improve **BLAKBOX**? Feel free to contribute by submitting issues, suggesting features, or making pull requests!  
+Want to help improve **BLAKBOX**?
+Feel free to contribute by submitting issues, suggesting features, or making pull requests, and join the list of 10e6X engineers:  
+
+<a href="https://github.com/r3shape/BLAKBOX/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=r3shape/BLAKBOX"/>
+</a>
+
 
 ## License  
 **BLAKBOX** is open-source under the **MIT License.**
