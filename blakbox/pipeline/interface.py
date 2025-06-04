@@ -1,47 +1,30 @@
-from blakbox.globs import pg
+from blakbox.globals import pg
 from blakbox.atom import BOXatom
-from blakbox.app.resource.inputs import BOXmouse
-from blakbox.app.resource.events import BOXevents
-from blakbox.app.resource.window import BOXwindow
-from blakbox.util import add_v2, sub_v2, div_v2, point_inside
+from blakbox.utils import add_v2, sub_v2, point_inside
 
-class ELEMENT_FLAG:
-    HOVERED: int = (1 << 0)
-    CLICKED: int = (1 << 1)
-    SHOW_BORDER: int = (1 << 2)
-    SHOW_ELEMENTS: int = (1 << 3)
+from blakbox.app.inputs import BOXmouse
+from blakbox.app.window import BOXwindow
+from blakbox.app.events import BOXevents
+from blakbox.resource.element import BOXelement, ELEMENT_FLAG
+
+class INTERFACE_FLAG:
+    SHOW_TITLE: int = (1 << 0)
+    SHOW_ELEMENTS: int = (1 << 1)
 
 # ------------------------------------------------------------ #
-class BOXelement(BOXatom):
-    def __init__(self, size: list[int], pos: list[float], color: list[int] = [255, 255, 255]) -> None:
+class BOXinterface(BOXatom):
+    def __init__(self, pos: list[int] = [0, 0]) -> None:
         super().__init__(0, 0)
         
-        self.size: list[int] = size
+        # general settings
         self.pos: list[float] = pos
-        self.color: list[int] = color
-        self._offset: list[float] = [0, 0]
-
-        self.border_width: int = 1
-        self.border_size: list[int] = [0, 0]
-        self.border_offset: list[int] = [0, 0]
-        self.border_radius: list[int] = [0, 0, 0, 0]
-        self.border_color: list[int] = [255, 255, 255]
-
-        self.surface: pg.Surface = pg.Surface(self.size)
-        self.surface.fill(self.color)
-
+        self.title: str = "BOXinterface"
+        self.title_color: list[int] = [0, 0, 0]
+        
         self.elements: dict[str, BOXelement] = {}
 
-        self.set_state(ELEMENT_FLAG.SHOW_ELEMENTS)
+        self.set_state(INTERFACE_FLAG.SHOW_ELEMENTS)
 
-    @property
-    def rect(self) -> pg.Rect:
-        return pg.Rect(add_v2(self.pos, self._offset), self.size)
-
-    @property
-    def border(self) -> pg.Rect:
-        return pg.Rect(sub_v2(add_v2(add_v2(self.pos, self._offset), self.border_offset), div_v2(self.border_size, 2)), add_v2(self.size, self.border_size))
-    
     def set_element(self, key: str, element: "BOXelement") -> None:
         element.pos = [
             element.pos[0] + self.pos[0],
@@ -56,12 +39,8 @@ class BOXelement(BOXatom):
         if self.get_element(key) is not None:
             del self.elements[key]
 
-    def on_click(self) -> None: pass
-    def on_hover(self) -> None: pass
-    def on_unhover(self) -> None: pass
-
-    def update(self, events: BOXevents) -> None:
-        if self.get_state(ELEMENT_FLAG.SHOW_ELEMENTS):
+    def update(self, events: BOXevents, dt: float) -> None:
+        if self.get_state(INTERFACE_FLAG.SHOW_ELEMENTS):
             for elem in self.elements.values():
                 elem.update(events)
                 mw = point_inside(BOXmouse.pos.screen, [*sub_v2(add_v2(elem.pos, elem._offset), elem.border_size), *add_v2(elem.size, elem.border_size)])
@@ -76,12 +55,15 @@ class BOXelement(BOXatom):
                 if elem.get_state(ELEMENT_FLAG.HOVERED) and events.mouse_pressed(BOXmouse.LeftClick):
                     events.mouse[BOXmouse.LeftClick] = 0    # shouldnt need this but fixes the element double-click issue :|
                     elem.on_click()
-                    
+
     def blit(self, window: BOXwindow) -> None:
-        if self.get_state(ELEMENT_FLAG.SHOW_ELEMENTS):
+        if self.get_state(INTERFACE_FLAG.SHOW_TITLE):
+            print("Show Interface Title")
+
+        if self.get_state(INTERFACE_FLAG.SHOW_ELEMENTS):
             for elem in self.elements.values():
-                elem.blit(window)
                 window.screen.blit(elem.surface, elem.pos)
+                elem.blit(window)
                 elem._offset = self.pos
                 if elem.get_state(ELEMENT_FLAG.SHOW_BORDER):
                     pg.draw.rect(

@@ -1,7 +1,7 @@
 from blakbox.atom import BOXatom
-from blakbox.util import div2_v2i, mul_v2
-from blakbox.globs import os, pg, json, random
-from blakbox.app.resource.objectgrid import BOXobjectgrid, BOXobject
+from blakbox.utils import div2_v2i, mul_v2
+from blakbox.globals import os, pg, json, random
+from blakbox.scene.objectgrid import BOXobjectgrid, BOXobject
 
 # ------------------------------------------------------------ #
 class BOXtilemap(BOXatom):

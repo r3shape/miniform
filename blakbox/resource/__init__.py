@@ -1,19 +1,12 @@
-from blakbox.globs import pg, re
-from blakbox.app.resource.clock import BOXclock
-from blakbox.app.resource.events import BOXevents
-from blakbox.app.resource.window import BOXwindow
-from blakbox.app.resource.camera import BOXcamera
-from blakbox.app.resource.object import BOXobject, OBJECT_FLAG
-from blakbox.app.resource.surfatlas import BOXsurfatlas
-from blakbox.app.resource.renderer import BOXrenderer, RENDERER_FLAG
-from blakbox.app.resource.particle import BOXparticles
-from blakbox.app.resource.inputs import BOXkeyboard, BOXmouse
-from blakbox.app.resource.manager import BOXresources
-from blakbox.app.resource.surface import BOXsurface
-from blakbox.app.resource.surfarray import BOXsurfarray
-from blakbox.app.resource.objectgrid import BOXobjectgrid
-from blakbox.app.resource.tilemap import BOXtilemap
-
+from blakbox.globals import pg, re
+from blakbox.resource.object import BOXobject, OBJECT_FLAG
+from blakbox.resource.surfatlas import BOXsurfatlas
+from blakbox.resource.manager import BOXresources
+from blakbox.resource.surface import BOXsurface
+from blakbox.resource.surfarray import BOXsurfarray
+from blakbox.resource.particle import BOXparticles
+from blakbox.resource.textbox import BOXtextbox
+from blakbox.resource.element import BOXelement, ELEMENT_FLAG
 
 create_surface = lambda size, color: pg.Surface(size, pg.SRCALPHA)
 create_rect = lambda location, size: pg.Rect(location, size)

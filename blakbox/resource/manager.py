@@ -1,10 +1,10 @@
-from blakbox.globs import os, re, pg
+from blakbox.globals import os, re, pg
 # from blakbox.app.resource.audio import BOXaudio
-from blakbox.app.resource.surface import BOXsurface
-from blakbox.app.resource.surfarray import BOXsurfarray
-from blakbox.app.resource.surfatlas import BOXsurfatlas
+from blakbox.resource.surface import BOXsurface
+from blakbox.resource.surfarray import BOXsurfarray
+from blakbox.resource.surfatlas import BOXsurfatlas
 
-from blakbox.app.resource.object import BOXobject, OBJECT_FLAG
+from blakbox.resource.object import BOXobject, OBJECT_FLAG
 
 # ------------------------------------------------------------ #
 class BOXresources:

@@ -14,7 +14,7 @@ class BOXscene(blakbox.atom.BOXatom):
         self.camera: blakbox.app.resource.BOXcamera = blakbox.app.resource.BOXcamera(app.window)
         self.resource: blakbox.app.resource.BOXresources = blakbox.app.resource.BOXresources(atlas_size)
         self.renderer: blakbox.app.resource.BOXrenderer = blakbox.app.resource.BOXrenderer(self, app.window, self.camera)
-        self.tilemap: blakbox.app.resource.BOXtilemap = blakbox.app.resource.BOXtilemap(self, blakbox.util.scale_v2(tile_size, 2), grid_size)
+        self.tilemap: blakbox.app.resource.BOXtilemap = blakbox.app.resource.BOXtilemap(self, blakbox.utils.scale_v2(tile_size, 2), grid_size)
         
     def cleanup(self) -> None: raise NotImplementedError
     def configure(self) -> None: raise NotImplementedError

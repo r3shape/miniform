@@ -1,6 +1,6 @@
-from blakbox.globs import pg
-from blakbox.util import abs_path
-from blakbox.app.ui.element import BOXelement
+from blakbox.globals import pg
+from blakbox.utils import abs_path
+from blakbox.resource.element import BOXelement
 
 # ------------------------------------------------------------ #
 class BOXtextbox(BOXelement):

@@ -1,6 +1,6 @@
 from blakbox.atom import BOXatom
-from blakbox.util import div2_v2i, div_v2
-from blakbox.app.resource.object import BOXobject
+from blakbox.utils import div2_v2i, div_v2
+from blakbox.resource.object import BOXobject
 
 # ------------------------------------------------------------ #
 class BOXobjectgrid(BOXatom):

@@ -1,7 +1,7 @@
-from blakbox.globs import pg
-from blakbox.app.resource.window import BOXwindow
-from blakbox.app.resource.object import BOXobject, OBJECT_FLAG
-from blakbox.util import add_v2, sub_v2, div_v2, scale_v2
+from blakbox.globals import pg
+from blakbox.app.window import BOXwindow
+from blakbox.resource.object import BOXobject, OBJECT_FLAG
+from blakbox.utils import add_v2, sub_v2, div_v2, scale_v2
 
 # ------------------------------------------------------------ #
 class BOXcamera(BOXobject):

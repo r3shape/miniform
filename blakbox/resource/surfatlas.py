@@ -1,6 +1,6 @@
-from blakbox.globs import os, pg
-from blakbox.util import add_v2, mul_v2
-from blakbox.app.resource.object import BOXobject
+from blakbox.globals import os, pg
+from blakbox.utils import add_v2, mul_v2
+from blakbox.resource.object import BOXobject
 
 # ------------------------------------------------------------ #
 class BOXsurfatlas(BOXobject):

@@ -1,12 +1,12 @@
-from blakbox.globs import pg
+from blakbox.globals import pg
 from blakbox.atom import BOXatom
-from blakbox.app.resource.window import BOXwindow
-from blakbox.app.resource.camera import BOXcamera
-from blakbox.app.resource.surface import BOXsurface
-from blakbox.app.resource.particle import BOXparticles
-from blakbox.app.resource.surfarray import BOXsurfarray
-from blakbox.app.resource.surfatlas import BOXsurfatlas
-from blakbox.app.resource.object import BOXobject, OBJECT_FLAG
+from blakbox.app.window import BOXwindow
+from blakbox.pipeline.camera import BOXcamera
+from blakbox.resource.surface import BOXsurface
+from blakbox.resource.particle import BOXparticles
+from blakbox.resource.surfarray import BOXsurfarray
+from blakbox.resource.surfatlas import BOXsurfatlas
+from blakbox.resource.object import BOXobject, OBJECT_FLAG
 
 class RENDERER_FLAG:
     DEBUG_OBJECT: int = (1 << 0)

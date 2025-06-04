@@ -1,7 +1,7 @@
-from blakbox.globs import pg
+from blakbox.globals import pg
 from blakbox.atom import BOXatom
-from blakbox.util import equal_arrays
-from blakbox.app.resource.surfatlas import BOXsurfatlas
+from blakbox.utils import equal_arrays
+from blakbox.resource.surfatlas import BOXsurfatlas
 
 # ------------------------------------------------------------ #
 class BOXsurface(BOXatom):

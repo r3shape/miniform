@@ -72,7 +72,13 @@ div_v2i = lambda v, s: [v[0] // s, v[1] // s]
 div2_v2 = lambda a, b: [a[0] / b[0], a[1] / b[1]]
 div2_v2i = lambda a, b: [a[0] // b[0], a[1] // b[1]]
 dist_v2 = lambda a, b: mag_v2(sub_v2(a, b))
+
 scale_v2 = lambda v, s: [v[0] * s, v[1] * s]
+scale_v2i = lambda v, s: [int(v[0] * s), int(v[1] * s)]
+
+scale_v3 = lambda v, s: [v[0] * s, v[1] * s, v[2] * s]
+scale_v3i = lambda v, s: [int(v[0] * s), int(v[1] * s), int(v[2] * s)]
+
 mag_v2 = lambda v: (v[0]**2 + v[1]**2) ** 0.5
 mul_v2 = lambda v, s: [v[0] * s[0], v[1] * s[1]]
 add_v2 = lambda a, b: [a[0] + b[0], a[1] + b[1]]
@@ -83,7 +89,7 @@ unequal_arrays = lambda a, b: all([*map(lambda a, b: a != b, a, b)])
 norm_v2 = lambda v: [v[0] / mag_v2(v), v[1] / mag_v2(v)] if mag_v2(v) != 0 else [0, 0]
 # ------------------------------------------------------------ #
 
-def abs_path(path: str) -> str:
+def box_path(path: str) -> str:
     fp = __file__.split(os.sep)
     fp.remove(fp[len(fp)-1])
     [fp.append(p) for p in path.replace("/", os.sep).replace("\\", os.sep).split(os.sep)]
@@ -91,7 +97,7 @@ def abs_path(path: str) -> str:
     return fp
 
 def rel_path(path: str) -> str:
-    fp = path.replace("/", os.sep).replace("\\", os.sep)
+    fp = os.path.join(os.getcwd(), path.replace("/", os.sep).replace("\\", os.sep))
     return fp
 
 def point_inside(point: list[int|float], bounds: list[int|float]) -> bool:

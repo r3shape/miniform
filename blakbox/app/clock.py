@@ -1,4 +1,4 @@
-from blakbox.globs import pg, time
+from blakbox.globals import pg, time
 from blakbox.atom import BOXatom
 
 # ------------------------------------------------------------ #

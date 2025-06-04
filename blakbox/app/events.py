@@ -1,4 +1,4 @@
-from blakbox.globs import pg
+from blakbox.globals import pg
 
 # ------------------------------------------------------------ #
 class BOXevents:

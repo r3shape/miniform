@@ -1,6 +1,6 @@
-from blakbox.globs import pg
-from blakbox.app.resource.surface import BOXsurface
-from blakbox.app.resource.surfarray import BOXsurfarray
+from blakbox.globals import pg
+from blakbox.resource.surface import BOXsurface
+from blakbox.resource.surfarray import BOXsurfarray
 
 # ------------------------------------------------------------ #
 class BOXkeyboard:

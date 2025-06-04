@@ -1,6 +1,6 @@
-from blakbox.globs import pg
+from blakbox.globals import pg
 from blakbox.atom import BOXatom
-from blakbox.util import add_v2, sub_v2, div_v2, abs_path
+from blakbox.utils import add_v2, sub_v2, div_v2, abs_path
 
 # ------------------------------------------------------------ #
 class BOXwindow(BOXatom):

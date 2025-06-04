@@ -1,6 +1,6 @@
-from blakbox.globs import pg
+from blakbox.globals import pg
 from blakbox.atom import BOXatom
-from blakbox.app.resource.surfatlas import BOXsurfatlas
+from blakbox.resource.surfatlas import BOXsurfatlas
 
 # ------------------------------------------------------------ #
 class BOXsurfarray(BOXatom):

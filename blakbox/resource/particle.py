@@ -1,4 +1,4 @@
-from blakbox.globs import os, pg, math, random
+from blakbox.globals import os, pg, math, random
 from blakbox.atom import BOXatom
 
 # ------------------------------------------------------------ #

@@ -12,5 +12,6 @@ BLAKBOX_QUOTES: list[str] = [
     "moar particles!",
     "d34d0s, wake up!",
     "bundle of joy...",
-    "take a look inside..."
+    "take a look inside...",
+    "It comes with a poster!"
 ]

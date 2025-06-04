@@ -1,18 +1,17 @@
-from blakbox.globs import pg
+from blakbox.globals import pg
 from blakbox.atom import BOXatom
-from blakbox.util import add_v2, div_v2
+from blakbox.utils import add_v2, div_v2
 
-from blakbox.app.resource.clock import BOXclock
-from blakbox.app.resource.events import BOXevents
-from blakbox.app.resource.window import BOXwindow
-from blakbox.app.resource.camera import BOXcamera
-# from blakbox.app.ui.interface import BOXinterface
-from blakbox.app.resource.renderer import BOXrenderer
-from blakbox.app.resource.manager import BOXresources
-from blakbox.app.resource.surfatlas import BOXsurfatlas
-from blakbox.app.resource.inputs import BOXkeyboard, BOXmouse
+from blakbox.app.clock import BOXclock
+from blakbox.app.events import BOXevents
+from blakbox.app.window import BOXwindow
+from blakbox.pipeline.camera import BOXcamera
+from blakbox.pipeline.renderer import BOXrenderer
+from blakbox.resource.manager import BOXresources
+from blakbox.resource.surfatlas import BOXsurfatlas
+from blakbox.app.inputs import BOXkeyboard, BOXmouse
 
-from blakbox.app.scene import BOXscene
+from blakbox.scene.scene import BOXscene
 
 # ------------------------------------------------------------ #
 class BOXapplication:
