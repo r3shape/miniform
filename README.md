@@ -39,25 +39,58 @@ After youv'e installed `miniform` go ahead and create a script named `main.py` s
 ```python
 import miniform
 
-class MyGame(miniform.app.MiniApp):
-    def __init__(self) -> None:
+class MyWorld(miniform.resource.world.MiniWorld):
+    def __init__(self, app):
         super().__init__(
-            title = "My Game",
-            window_size = [800, 600],
+            app,
+            miniform.resource.world.MiniTilemap(self, [32, 32]),
+            miniform.resource.world.MiniGridPartition(app, self, [32, 32])
         )
 
-    def init(self) -> None: pass
+    def init(self) -> None:
+        self.player = self.load_object("player-1", size=[16, 16], pos=[100, 100], mass=800, static=0)
+
+    def update_hook(self, dt: float) -> None:
+        if self.app.events.mouse_wheel_up:
+            self.app.camera_proc.zoom(-2.5)
+        elif self.app.events.mouse_wheel_down:
+            self.app.camera_proc.zoom(2.5)
+        
+        speed = 200.0
+        if self.app.events.key_held(self.app.keyboard.W): self.player.set_velocity(vy=-speed)
+        if self.app.events.key_held(self.app.keyboard.A): self.player.set_velocity(vx=-speed)
+        if self.app.events.key_held(self.app.keyboard.S): self.player.set_velocity(vy=speed)
+        if self.app.events.key_held(self.app.keyboard.D): self.player.set_velocity(vx=speed)
+        
+        self.app.camera_proc.move_to(self.player.pos)
+
+    def render_hook(self) -> None:
+        if self.app.events.mouse_held(self.app.mouse.LeftClick):
+            self.app.render_proc.draw_line(self.player.center, self.app.mouse.pos.world, [0, 0, 255])
+            self.app.render_proc.draw_circle(self.player.center, 4, [0, 0, 255])
+            self.tile_map.set_tile(self.app.mouse.pos.world, 1)
+        elif self.app.events.mouse_held(self.app.mouse.RightClick):
+            self.app.render_proc.draw_line(self.player.center, self.app.mouse.pos.world, [255, 0, 0])
+            self.app.render_proc.draw_circle(self.player.center, 4, [255, 0, 0])
+            self.tile_map.rem_tile(self.app.mouse.pos.world)
+
+class MyApp(miniform.app.MiniApp):
+    def __init__(self) -> None:
+        super().__init__("PlayGround")
+
+    def init(self) -> None:
+        self.set_world(MyWorld)
+
     def exit(self) -> None: pass
 
     def update_hook(self, dt: float) -> None: pass
     def render_hook(self) -> None: pass
 
-if __name__ == "__main__":
-    MyGame().run()
+MyApp().run()
 ```
 | NOTE: The methods `init()`, `exit()` must be defined for any instance of `MiniApp`; a `NotImplementedError` is raised otherwise.
 
-Above is the minimal code needed to get a simple `MiniApp` up and running. From here you can explore the `MiniWorld` and the other classes provided in `miniform.core.resource` and `miniform.core.resource.interface`.
+Above is a simple `MiniApp` + `MiniWorld` set up for topdown movement/runtime tilemap edits. From here you can explore the `MiniStaticObject`, `MiniDynamicObject` and the other classes provided in `miniform.core.resource` and `miniform.core.resource.interface`.
 
 ## Contributions?  
 Want to help improve **miniform**? Feel free to contribute by submitting issues, suggesting features, or making pull requests!  
