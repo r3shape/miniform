@@ -1,2 +1,2 @@
-include blakbox/assets/fonts/*
-include blakbox/assets/images/*
+include miniform/assets/fonts/*
+include miniform/assets/images/*
