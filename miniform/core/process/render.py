@@ -73,6 +73,23 @@ class MiniRenderProc(miniform.MiniAtom):
             if not partition.query_cell(world_pos): continue
             self.draw_rect(partition.cell_size, world_pos, [0, 255, 0], 2)
 
+    def _debug_draw_tile_map(self) -> None:
+        if not isinstance(self.app.world, miniform.resource.world.world.MiniWorld): return
+
+        tile_size = self.app.world.tile_map.tile_size
+        
+        start = [0, 0]
+        end = [(start[0] * tile_size[0]) // tile_size[0],
+               (start[1] * tile_size[1]) // tile_size[1]]
+        
+        for gx in range(int(start[0]), int(end[0])):
+            x = gx * tile_size[0]
+            self.draw_line([x, start[1] * tile_size[1]], [x, end[1] * tile_size[1]], [40, 40, 40], 1)
+        
+        for gy in range(int(start[1]), int(end[1])):
+            y = gy * tile_size[1]
+            self.draw_line([start[0] * tile_size[0], y], [end[0] * tile_size[0], y], [40, 40, 40], 1)
+
     def _debug_draw_light_rays(self) -> None:
         if not isinstance(self.app.world, miniform.resource.world.world.MiniWorld): return
 
@@ -90,6 +107,9 @@ class MiniRenderProc(miniform.MiniAtom):
     def update(self) -> None:
         self.blits = 0
 
+        if self.app.get_flag(miniform.MiniAppFlag.APP_DEBUG_TILE_MAP):
+            self._debug_draw_tile_map()
+            
         if self.app.get_flag(miniform.MiniAppFlag.APP_DEBUG_PARTITION):
             match type(self.app.world.partition):
                 case miniform.resource.world.MiniGridPartition:

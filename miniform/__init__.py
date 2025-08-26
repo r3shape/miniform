@@ -1,8 +1,8 @@
 # miniform - A neat little thing...
 from miniform.globals import *
 
-from miniform.atom import MiniAtom
 from miniform.log import MiniLogger
+from miniform.atom import MiniAtom, MiniProfile
 
 import miniform.utils as utils
 

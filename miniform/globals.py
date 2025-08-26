@@ -5,7 +5,8 @@ class MiniAppFlag:
 
     APP_DEBUG_LIGHTS: int =     (1 << 2)
     APP_DEBUG_OBJECTS: int =    (1 << 3)
-    APP_DEBUG_PARTITION: int =  (1 << 4)
+    APP_DEBUG_TILE_MAP: int =   (1 << 4)
+    APP_DEBUG_PARTITION: int =  (1 << 5)
 
 class MiniObjectFlag:
     OBJECT_DIRTY:   int =       (1 << 0)
@@ -36,6 +37,16 @@ class MiniElementFlag:
     
     # Visual Flags
     ANTI_ALIAS: int              = (1 << 15)
+
+    # Layout Flags
+    DISPLAY_ROW: int             = (1 << 16)
+    DISPLAY_LIST: int            = (1 << 17)
+    DISPLAY_ABSOLUTE: int        = (1 << 18)
+    
+    # Alignment flags
+    ALIGN_LEFT: int              = (1 << 19)
+    ALIGN_RIGHT: int             = (1 << 20)
+    ALIGN_CENTER: int            = (1 << 21)
 
 class MiniCameraFlag:
     CAMERA_DIRTY:   int =       (1 << 0)

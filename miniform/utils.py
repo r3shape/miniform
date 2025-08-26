@@ -1,4 +1,5 @@
 from miniform.imports import pg, re, os, math
+import miniform
 
 """ LAMBDAS """
 lerp = lambda a, b, t: a + (b - a) * t
@@ -131,6 +132,14 @@ blit_rect = lambda surface, rect, color, width: draw_rect(surface, rect.size, re
 draw_line = lambda surface, start, end, color, width: pg.draw.line(surface, color, start, end, width=width)
 draw_rect = lambda surface, size, location, color, width: pg.draw.rect(surface, color, pg.Rect(location, size), width=width)
 draw_circle = lambda surface, center, radius, color, width: pg.draw.circle(surface, color, [*map(int, center)], radius, width)
+
+def export_surface(name: str, path: str, surface: pg.Surface) -> None:
+    path = rel_path(path)
+    if not os.path.exists(path):
+        miniform.MiniLogger.error(f"[Miniform] failed to export surface: (name){name} (path){path}")
+        return False
+    pg.image.save(surface, os.path.join(path, f"{name}.png"))
+    miniform.MiniLogger.info(f"[Miniform] exported surface: (name){name} (path){path}")
 
 def outline_surface(surface: pg.Surface, color: list[int] = [0, 0, 0], thickness: int = 1) -> pg.Surface:
     """ draws an outline by shifting the surface mask, and filling with the passed color """

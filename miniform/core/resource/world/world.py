@@ -1,7 +1,7 @@
 from miniform.imports import pg, os, json
 import miniform
 
-from .tilemap import MiniTilemap
+from .tilemap import MiniTileMap
 from .grid import MiniGridPartition
 from .zone import MiniZonePartition
 from .object import MiniStaticObject, MiniDynamicObject
@@ -10,7 +10,7 @@ class MiniWorld(miniform.MiniAtom):
     def __init__(
             self,
             app: "miniform.app.MiniApp",
-            tile_map: MiniTilemap,
+            tile_map: MiniTileMap,
             partition: MiniGridPartition|MiniZonePartition) -> None:
         super().__init__()
         self.app: miniform.app.MiniApp = app
@@ -20,9 +20,9 @@ class MiniWorld(miniform.MiniAtom):
 
     def configure(
             self,
-            tile_map: MiniTilemap,
+            tile_map: MiniTileMap,
             partition: MiniGridPartition|MiniZonePartition) -> None:
-        self.tile_map: miniform.resource.world.MiniTilemap = tile_map
+        self.tile_map: miniform.resource.world.MiniTileMap = tile_map
         self.partition: miniform.resource.world.MiniGridPartition|miniform.resource.world.MiniZonePartition = partition
         self.light_proc: miniform.process.MiniLightProc = miniform.process.MiniLightProc(self.app, self.partition)
 

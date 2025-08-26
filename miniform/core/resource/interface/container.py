@@ -3,17 +3,6 @@ import miniform
 from .element import MiniElement
 
 class MiniContainer(MiniElement):
-    class flags:
-        # Layout Flags
-        DISPLAY_ROW: int             = 1 << 15
-        DISPLAY_LIST: int            = 1 << 16
-        DISPLAY_ABSOLUTE: int        = 1 << 17
-        
-        # Alignment flags
-        ALIGN_LEFT: int              = 1 << 18
-        ALIGN_RIGHT: int             = 1 << 19
-        ALIGN_CENTER: int            = 1 << 20
-
     def __init__(
             self,
             gap: int = 0,
@@ -34,12 +23,12 @@ class MiniContainer(MiniElement):
         self.padding: list[int] = padding[:]
 
         self.set_flag(flags)
-        self.set_flag(self.flags.DISPLAY_ROW)
+        self.set_flag(miniform.MiniElementFlag.DISPLAY_ROW)
 
     def _layout(self, offset: list[int] = [0, 0]) -> None:
-        if not self.get_flag(self.flags.DISPLAY_ROW) and not self.get_flag(self.flags.DISPLAY_LIST) and not self.get_flag(self.flags.DISPLAY_ABSOLUTE):
+        if not self.get_flag(miniform.MiniElementFlag.DISPLAY_ROW) and not self.get_flag(miniform.MiniElementFlag.DISPLAY_LIST) and not self.get_flag(miniform.MiniElementFlag.DISPLAY_ABSOLUTE):
             miniform.MiniLogger.warning("[Hcontainer] No layout flag set. Defaulting to DISPLAY_ABSOLUTE.")
-            self.set_flag(self.flags.DISPLAY_ABSOLUTE)
+            self.set_flag(miniform.MiniElementFlag.DISPLAY_ABSOLUTE)
 
         r, c = 0, 0
         w, h = 0, 0

@@ -1,3 +1,3 @@
 MINI_MAJOR: int = 0
 MINI_MINOR: int = 1
-MINI_PATCH: int = 0
+MINI_PATCH: int = 1
