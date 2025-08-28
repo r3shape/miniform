@@ -155,10 +155,7 @@ class MiniTileMap(miniform.MiniAtom):
             
             tile_sets = config["tile_sets"]
             for i, tile_set in enumerate(tile_sets):
-                if os.path.exists(tile_set):
-                    self.tile_sets.append([tile_set, miniform.utils.load_surface_array(tile_set, self.tile_size)])
-                else:
-                    miniform.MiniLogger.error(f"[MiniTileMap] tile_set not found: {tile_set}")
+                if not self.import_tile_set(tile_set):
                     return False
             
             for layer in tile_data:
@@ -208,8 +205,8 @@ class MiniTileMap(miniform.MiniAtom):
             for tile_pos in self.tile_data[layer]:
                 _, __, ___, tile_object = self.tile_data[layer][tile_pos]
                 self.world.rem_object(tile_object)
-        
         self.tile_data = {0: {}}
+        self.tile_vertices = None
 
     """ TILE OBJECT """
     def all_tiles(self, layer: int) -> list[MiniStaticObject|MiniDynamicObject]:

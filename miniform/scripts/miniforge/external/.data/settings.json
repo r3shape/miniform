@@ -12,8 +12,7 @@
             "keyboard": {
                 "clear-map": "F5",
                 "import-map": "F1",
-                "export-map": "F2",
-                "export-map-image": "F3"
+                "export-map": "F2"
             }
         }
     }

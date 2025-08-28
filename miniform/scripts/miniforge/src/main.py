@@ -13,7 +13,6 @@ class Miniforge(miniform.app.MiniApp):
             )
         else: self.exit()
 
-    @miniform.MiniProfile
     def _load_settings(self) -> bool:
         self.theme: dict = None
         self.settings: dict = None
@@ -35,10 +34,9 @@ class Miniforge(miniform.app.MiniApp):
         miniform.MiniLogger.debug("[Miniforge] the forge brightens...")
         return True
 
-    @miniform.MiniProfile
     def init(self) -> None:
         self.cache.load_font("slkscr", miniform.utils._miniform_path("scripts/miniforge/external/.data/assets/fonts/slkscr.ttf"), 18)
-        self.cache.load_surface("logo", miniform.utils._miniform_path("scripts/miniforge/external/.data/assets/images/wf3/Logo.ico"))
+        self.cache.load_surface("logo", miniform.utils._miniform_path("scripts/miniforge/external/.data/assets/images/icon/Logo.png"))
         
         self.cache.load_surface("draw", miniform.utils._miniform_path("scripts/miniforge/external/.data/assets/images/icon/Draw.png"))
         self.cache.load_surface("fill", miniform.utils._miniform_path("scripts/miniforge/external/.data/assets/images/icon/Fill.png"))

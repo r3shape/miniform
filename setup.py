@@ -4,7 +4,7 @@ version = [0, 1, 2]
 
 setuptools.setup(
     name='miniform',
-    version=f"{version[0]}.{version[1]}.{version[2]}",
+    version=f"{version[0]}.{version[1]}.{version[2]}-7",
     description='A neat little thing... with nightly updates',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',

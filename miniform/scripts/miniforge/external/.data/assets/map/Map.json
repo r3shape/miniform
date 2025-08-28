@@ -14,7 +14,7 @@
             10
         ],
         "tile_sets": [
-            "R:/dev/git/local/miniform/miniform/scripts/miniforge/external/.data/assets/images/tileset2.png"
+            "external/.data/assets/images/tileset.png"
         ]
     },
     "tile_data": {

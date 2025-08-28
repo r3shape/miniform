@@ -2,3 +2,17 @@ include miniform/assets/fonts/*
 include miniform/assets/images/*
 
 include miniform/scripts/miniforge/*
+include miniform/scripts/miniforge/src/*
+include miniform/scripts/miniforge/src/ui/*
+include miniform/scripts/miniforge/external/user/*
+
+include miniform/scripts/miniforge/external/.data/*
+
+include miniform/scripts/miniforge/external/.data/themes/*
+
+include miniform/scripts/miniforge/external/.data/assets/map/*
+
+include miniform/scripts/miniforge/external/.data/assets/fonts/*
+
+include miniform/scripts/miniforge/external/.data/assets/images/*
+include miniform/scripts/miniforge/external/.data/assets/images/icon/*

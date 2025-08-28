@@ -8,8 +8,8 @@ class MiniEditor(miniform.resource.world.MiniWorld):
     def __init__(self, wf) -> None:
         super().__init__(
             app=wf,
-            tile_map=miniform.resource.world.MiniTileMap(self, [16, 16], [0, 0], [50, 72, 60]),
-            partition=miniform.resource.world.MiniGridPartition(wf, self, [16, 16], [0, 0])
+            tile_map=miniform.resource.world.MiniTileMap(self, [32, 32], [0, 0], [50, 72, 60]),
+            partition=miniform.resource.world.MiniGridPartition(wf, self, [32, 32], [0, 0])
         )
 
     def init(self) -> None:
@@ -24,7 +24,7 @@ class MiniEditor(miniform.resource.world.MiniWorld):
         self.tile_id = 0
         self.tileset_id = 0
         self.tile_layer: int = 0
-        self.tile_size = [16, 16]
+        self.tile_size = [32, 32]
         self.tile_origin = [0, 0]
         self.tile_color = [50, 72, 60]
         self.configure(
@@ -32,13 +32,14 @@ class MiniEditor(miniform.resource.world.MiniWorld):
             partition=miniform.resource.world.MiniGridPartition(self.app, self, self.tile_size, self.tile_origin)
         )
         
-        self.map_loaded: bool = 0
-        self.tilebar_loaded: bool = 0
+        self.map_loaded: bool = 1
+        self.tilebar_loaded: bool = 1
+        self.tile_map.import_tile_set(miniform.utils._miniform_path("scripts/miniforge/external/.data/assets/images/tileset.png"))
 
         self.theme: dict = self.app.theme
         self.map_pos: list[float] = [0.0, 0.0]
 
-        # SCENE CONFIG
+        # WORLD CONFIG
         self.app.interface_proc.add_element("footer", MiniFooter(self))
         self.app.interface_proc.add_element("tools", MiniToolBar(self))
 
@@ -53,17 +54,13 @@ class MiniEditor(miniform.resource.world.MiniWorld):
             self.app.camera_proc.zoom(2 * self.app.events.mouse_wheel_down)
 
         # map import
-        if self.app.events.key_pressed(self.app.key_binds["import-map"]):
-            if self.tile_map.import_data(self.map_name, miniform.utils._miniform_path(self.map_path)):
-                self.map_loaded = True
+        # if self.app.events.key_pressed(self.app.key_binds["import-map"]):
+        #     if self.tile_map.import_data(self.map_name, miniform.utils._miniform_path(self.map_path)):
+        #         self.map_loaded = True
 
-        # map export
-        if self.app.events.key_pressed(self.app.key_binds["export-map"]):
-            self.tile_map.export_data(self.map_name, miniform.utils._miniform_path(self.map_path))
-
-        # map image export
-        if self.app.events.key_pressed(self.app.key_binds["export-map-image"]):
-            self.tile_map.export_surface(self.map_name, self.map_path, self.export_grid)
+        # # map export
+        # if self.app.events.key_pressed(self.app.key_binds["export-map"]):
+        #     self.tile_map.export_data(self.map_name, miniform.utils._miniform_path(self.map_path))
 
         # map clear/reset
         if self.app.events.key_pressed(self.app.key_binds["clear-map"]):
