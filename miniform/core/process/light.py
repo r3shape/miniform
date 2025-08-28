@@ -1,63 +1,58 @@
 from miniform.imports import pg, math
 import miniform
 
+from ..resource.world.light import MiniLight
+from ..resource.world.tilemap import MiniTileMap
+from ..resource.world.grid import MiniGridPartition
+from ..resource.world.zone import MiniZonePartition
+from ..resource.world.object import MiniStaticObject, MiniDynamicObject
+
 class MiniLightProc(miniform.MiniAtom):
     def __init__(
             self,
             app,
+            tile_map,
             partition):
         super().__init__()
         self.app: miniform.app.MiniApp = app
-        self.partition: miniform.resource.world.MiniGridPartition|miniform.resource.world.MiniZonePartition = partition
+        self.tile_map: MiniTileMap = tile_map
+        self.partition: MiniGridPartition|MiniZonePartition = partition
         
-        self.lights: list[miniform.resource.world.MiniLight] = []
-        
-        self.ray_size: int = 100
-        self.ray_count: int = 164
-        self.ray_sub_step:int = 4
-        self.ray_step: float = 2 * math.pi / self.ray_count
+        self.lights: list[MiniLight] = []
 
-    def add_light(self, light: "miniform.resource.world.MiniLight") -> None:
-        if not isinstance(light, miniform.resource.world.MiniLight): return
+    def add_light(self, light: MiniLight) -> None:
+        if not isinstance(light, MiniLight): return
         if light in self.lights: return
         self.lights.append(light)
-    
-    def cast_rays(self, light: "miniform.resource.world.MiniLight") -> None:
-        r = light.radius
-        center = light.pos
 
-        for i in range(self.ray_count):
-            angle = i * self.ray_step
-            dx = math.cos(angle)
-            dy = math.sin(angle)
+    def light_phase(self, light: MiniLight, render_proc) -> list[MiniStaticObject|MiniDynamicObject]:
+        light_size = miniform.utils.scale_v2([light.radius + light.ray_len, light.radius + light.ray_len], 2)
+        light_pos = miniform.utils.sub_v2(light.pos, miniform.utils.scale_v2(light_size, .5))
+        render_proc.draw_rect(light_size, light_pos, light.color, 1)
+        if not render_proc.visible(light_pos, light_size): return
 
-            startx = center[0] + dx * r
-            starty = center[1] + dy * r
+        cell_w, cell_h = self.partition.cell_size
 
-            for step in range(0, self.ray_size, self.ray_sub_step):
-                px = startx + dx * step
-                py = starty + dy * step
+        if not light.cell_radius:
+            light.cell_radius = [(light_size[0] // cell_w) - 1, (light_size[1] // cell_h) - 1]
 
-                start = [startx, starty]
-                end = [px, py]
-                objs = self.partition.query_cell_region(end, [self.ray_sub_step, self.ray_sub_step], 1, 1)
-                isec = False
-                for obj in objs:
-                    if pg.Rect(obj.rect).collidepoint(*end):
-                        isec = True
-                        break
-                if isec: break
-            light.rays.append([start, end])
+        light_rx = light_ry = light.radius
+        light_crx, light_cry = light.cell_radius
 
+        for cell in self.partition.get_cell_region(light.pos, [light_rx, light_ry], light_crx, light_cry):
+            render_proc.draw_rect(self.partition.cell_size, miniform.utils.mul_v2(cell, self.partition.cell_size), [255, 0, 255], 1)
+
+        # tile map pass
+        light.cast_rays(self.tile_map.tile_vertices)        
+
+    def shadow_phase(self, light: MiniLight, visible: list[MiniStaticObject|MiniDynamicObject], render_proc) -> None:
+        if not visible: return
+        else: return
 
     def render(self) -> None:
         render_proc = self.app.render_proc
         for light in self.lights:
-            size = [light.radius + self.ray_size, light.radius + self.ray_size]
-            pos = miniform.utils.sub_v2(light.pos, miniform.utils.scale_v2(size, .5))
-            if not render_proc.visible(pos, size): continue
-            
-            light.rays.clear()
-            self.cast_rays(light)
-            render_proc.draw_circle(light.pos, light.radius, light.color)
-            render_proc.draw_rect(size, pos, [255, 255, 255])
+            visible = self.light_phase(light, render_proc)
+            self.shadow_phase(light, visible, render_proc)
+            render_proc.draw_circle(light.pos, light.radius, light.color, 1)
+            render_proc.draw_circle(light.pos, light.radius + light.ray_len, light.color, 1)

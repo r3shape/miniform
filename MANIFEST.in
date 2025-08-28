@@ -1,2 +1,4 @@
 include miniform/assets/fonts/*
 include miniform/assets/images/*
+
+include miniform/scripts/miniforge/*

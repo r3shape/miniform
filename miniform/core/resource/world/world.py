@@ -24,7 +24,7 @@ class MiniWorld(miniform.MiniAtom):
             partition: MiniGridPartition|MiniZonePartition) -> None:
         self.tile_map: miniform.resource.world.MiniTileMap = tile_map
         self.partition: miniform.resource.world.MiniGridPartition|miniform.resource.world.MiniZonePartition = partition
-        self.light_proc: miniform.process.MiniLightProc = miniform.process.MiniLightProc(self.app, self.partition)
+        self.light_proc: miniform.process.MiniLightProc = miniform.process.MiniLightProc(self.app, self.tile_map, self.partition)
 
         self.object_count: int = 0
         self.static_objects: list[miniform.resource.world.MiniStaticObject] = []
@@ -104,9 +104,10 @@ class MiniWorld(miniform.MiniAtom):
                 obj.update(neighbors, dt)
                 self.partition.update_object(obj)
             obj.update_hook(dt)
-        self._unfreeze()
         self.update_hook(dt)
-        self._freeze()
+
+        if self.tile_map.tile_count == 0:
+            self.tile_map.tile_vertices = None
 
     def render(self) -> None:
         visible = self.partition.query_cell_region(

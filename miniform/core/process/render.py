@@ -20,7 +20,8 @@ class MiniRenderProc(miniform.MiniAtom):
 
 
     """ USER DRAWS """
-    def draw(self, surface: pg.Surface, pos: list[float]) -> None:
+    def draw(self, surface: pg.Surface, pos: list[float], offset: list[float]=[0, 0]) -> None:
+        pos = miniform.utils.add_v2(pos, offset)
         if self.visible(pos, surface.size):
             self.target.blit(surface, [*map(int, self.camera.project(pos))])
             self.blits += 1
@@ -43,6 +44,10 @@ class MiniRenderProc(miniform.MiniAtom):
         if self.visible(pos, size):
             pg.draw.rect(self.target, color, pg.Rect([*map(int, self.camera.project(pos))], size), width=width)
 
+    def draw_triangle(self, left, right, center, color: list[int]=[255, 255, 255]) -> None:
+        self.draw_line(left, right)
+        self.draw_line(left, center)
+        self.draw_line(right, center)
 
     """ DEBUG DRAWS """
     def _debug_draw_zone_partition(self) -> None:
@@ -90,6 +95,13 @@ class MiniRenderProc(miniform.MiniAtom):
             y = gy * tile_size[1]
             self.draw_line([start[0] * tile_size[0], y], [end[0] * tile_size[0], y], [40, 40, 40], 1)
 
+        vertices = self.app.world.tile_map.tile_vertices
+        if isinstance(vertices, list):
+            for sv, ev in vertices:
+                self.draw_circle(sv, 2, [255, 0, 0])
+                self.draw_circle(ev, 2, [255, 0, 0])
+                self.draw_line(sv, ev, [255, 255, 255], 1)
+
     def _debug_draw_light_rays(self) -> None:
         if not isinstance(self.app.world, miniform.resource.world.world.MiniWorld): return
 
@@ -97,12 +109,13 @@ class MiniRenderProc(miniform.MiniAtom):
         lights = world.light_proc.lights
         for light in lights:
             for ray in light.rays:
-                size = [light.radius + world.light_proc.ray_size, light.radius + world.light_proc.ray_size]
-                pos = miniform.utils.sub_v2(light.pos, miniform.utils.scale_v2(size, .5))
-                if not self.visible(pos, size): continue
+                light_size = miniform.utils.scale_v2([light.radius + light.ray_len, light.radius + light.ray_len], 2)
+                light_pos = miniform.utils.sub_v2(light.pos, miniform.utils.scale_v2(light_size, .5))
+                if not self.visible(light_pos, light_size): continue
 
-                self.draw_line(ray[0], ray[1], light.color)
-                self.draw_pixel(ray[1], [0, 255, 0])
+                # self.draw_line(light.pos, ray, light.color)
+                pg.draw.line(self.target, light.color, self.camera.project(light.pos), self.camera.project(ray), 1)
+                self.draw_pixel(ray, [0, 255, 0])
 
     def update(self) -> None:
         self.blits = 0
@@ -119,6 +132,7 @@ class MiniRenderProc(miniform.MiniAtom):
                 case _: pass
 
         if isinstance(self.app.world, miniform.resource.world.world.MiniWorld):
+            """ LIGHT PHASE """
             if self.app.get_flag(miniform.MiniAppFlag.APP_DEBUG_LIGHTS):
                 self._debug_draw_light_rays()
             self.app.world.light_proc.render()

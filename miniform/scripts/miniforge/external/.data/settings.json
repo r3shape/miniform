@@ -1,0 +1,20 @@
+{
+    "hash": "ABC123",
+    "version": "1.0.0",
+    "app": {
+        "ws": [1280, 720],
+        "theme": "theforge",
+        "binds": {
+            "mouse": {
+                "set-tile": "LeftClick",
+                "rem-tile": "RightClick"
+            },
+            "keyboard": {
+                "clear-map": "F5",
+                "import-map": "F1",
+                "export-map": "F2",
+                "export-map-image": "F3"
+            }
+        }
+    }
+}

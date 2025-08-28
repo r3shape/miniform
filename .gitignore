@@ -1,4 +1,5 @@
 *.bat
+*venv/
 *dist/
 *build/
 *tests/

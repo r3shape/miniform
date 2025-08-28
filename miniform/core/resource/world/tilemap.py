@@ -10,7 +10,8 @@ class MiniTileMap(miniform.MiniAtom):
             
             tile_size: list[int],
             tile_origin: list[int]=[0, 0],
-            tile_color: list[int]=[172, 50, 50]) -> None:
+            tile_color: list[int]=[0, 0, 255]) -> None:
+            # tile_color: list[int]=[172, 50, 50]) -> None:
         super().__init__()
         self.world: miniform.resource.world.MiniWorld = world
         self.configure(tile_size, tile_origin, tile_color)
@@ -20,16 +21,17 @@ class MiniTileMap(miniform.MiniAtom):
             tile_size: list[int],
             tile_origin: list[int]=[0, 0],
             tile_color: list[int]=[172, 50, 50]) -> None:
-        
+                
         self.tile_count: int = 0
         # self.tile_data[l: int][(x: int,y: int)] = [tid, static, sid, object]
         self.tile_data: dict[str, list] = {0: {}}
+        self.tile_vertices: list[list[int]] = None
         # self.tile_sets[ts: int] = [tsp: str, surfs: list[pg.Surface]]
         self.tile_sets: list[list[str, pg.Surface]] = []
         self.tile_size: list[int] = [*map(int, tile_size)]
         self.tile_color: list[int] = [*map(int, tile_color)]
         self.tile_origin: list[int] = [*map(int, tile_origin)]
-  
+
     @property
     def size(self) -> list[int]:
         if not any(self.tile_data.values()):
@@ -57,9 +59,76 @@ class MiniTileMap(miniform.MiniAtom):
             for y in range(cy - size[1], (cy + size[1]) + 1):
                 region.append([x, y])
         return region
+    
+    def _gen_vertices(self, layer: int) -> None:
+        data = self.tile_data.get(layer, None)
+        if data is None or len(data) == 0: return
+        tiles = self.all_tiles(layer)
+        
+        X = 0; Y = 1
+        START = 0; END = 1
+        TX , TY = self.tile_size
+        NORTH = 0; SOUTH = 1; EAST = 2; WEST = 3
+
+        # scanline-sort
+        tiles.sort(key=lambda t: t.pos[0])
+        tiles.sort(key=lambda t: t.pos[1])
+
+        poly_map = {}
+        poly_ids = {}
+        for i, tile in enumerate(tiles):
+            gx, gy = miniform.utils.div2_v2i(tile.pos, self.tile_size)
+            poly_ids[(gx, gy)] = i
+            poly = {}
+
+            # no north tile
+            if (ntile := (data.get((gx, gy - 1), False))) == False:
+                if (wtile := (data.get((gx - 1, gy), False))) != False\
+                and wtile[-1].get_flag(miniform.MiniObjectFlag.OBJECT_N_EDGE):
+                    ngx, ngy = miniform.utils.div2_v2i(wtile[-1].pos, self.tile_size)
+                    poly_map[poly_ids[(ngx, ngy)]][NORTH][END][X] += TX
+                    poly[NORTH] = poly_map[poly_ids[(ngx, ngy)]][NORTH]
+                else: poly[NORTH] = [tile.top_left, tile.top_right]
+                tile.set_flag(miniform.MiniObjectFlag.OBJECT_N_EDGE)
+            else: tile.rem_flag(miniform.MiniObjectFlag.OBJECT_N_EDGE)
+
+            # no south tile
+            if (stile := (data.get((gx, gy + 1), False))) == False:
+                if (wtile := (data.get((gx - 1, gy), False))) != False\
+                and wtile[-1].get_flag(miniform.MiniObjectFlag.OBJECT_S_EDGE):
+                    ngx, ngy = miniform.utils.div2_v2i(wtile[-1].pos, self.tile_size)
+                    poly_map[poly_ids[(ngx, ngy)]][SOUTH][END][X] += TX
+                    poly[SOUTH] = poly_map[poly_ids[(ngx, ngy)]][SOUTH]
+                else: poly[SOUTH] = [tile.bottom_left, tile.bottom_right]
+                tile.set_flag(miniform.MiniObjectFlag.OBJECT_S_EDGE)
+            else: tile.rem_flag(miniform.MiniObjectFlag.OBJECT_S_EDGE)
+
+            # no east tile
+            if (etile := (data.get((gx + 1, gy), False))) == False:
+                if (ntile := (data.get((gx, gy - 1), False))) != False\
+                and ntile[-1].get_flag(miniform.MiniObjectFlag.OBJECT_E_EDGE):
+                    ngx, ngy = miniform.utils.div2_v2i(ntile[-1].pos, self.tile_size)
+                    poly_map[poly_ids[(ngx, ngy)]][EAST][END][Y] += TY
+                    poly[EAST] = poly_map[poly_ids[(ngx, ngy)]][EAST]
+                else: poly[EAST] = [tile.top_right, tile.bottom_right]
+                tile.set_flag(miniform.MiniObjectFlag.OBJECT_E_EDGE)
+            else: tile.rem_flag(miniform.MiniObjectFlag.OBJECT_E_EDGE)
+
+            # no west tile
+            if (wtile := (data.get((gx - 1, gy), False))) == False:
+                if (ntile := (data.get((gx, gy - 1), False))) != False\
+                and ntile[-1].get_flag(miniform.MiniObjectFlag.OBJECT_W_EDGE):
+                    ngx, ngy = miniform.utils.div2_v2i(ntile[-1].pos, self.tile_size)
+                    poly_map[poly_ids[(ngx, ngy)]][WEST][END][Y] += TY
+                    poly[WEST] = poly_map[poly_ids[(ngx, ngy)]][WEST]
+                else: poly[WEST] = [tile.top_left, tile.bottom_left]
+                tile.set_flag(miniform.MiniObjectFlag.OBJECT_W_EDGE)
+            else: tile.rem_flag(miniform.MiniObjectFlag.OBJECT_W_EDGE)
+            poly_map[i] = poly
+        self.tile_vertices = [v for id, poly in poly_map.items() for v in poly.values()]
 
     def import_tile_set(self, path: str) -> bool:
-        path = miniform.utils.rel_path(path)
+        path = path
         if not os.path.exists(path):
             miniform.MiniLogger.error(f"[MiniTileMap] failed to import tile_set: (path){path}")
             return False
@@ -70,12 +139,12 @@ class MiniTileMap(miniform.MiniAtom):
     def import_data(self, name: str, path: str) -> bool:
         self.clear()
 
-        path = miniform.utils.rel_path(path)
+        path = path
         if not os.path.exists(path):
             miniform.MiniLogger.error(f"[MiniTileMap] failed to import tilemap data: (path){path}")
             return False
         
-        path = miniform.utils.rel_path(os.path.join(path, f"{name}.json"))
+        path = os.path.join(path, f"{name}.json")
         with open(path, "r") as save:
             data = json.load(save)
             
@@ -101,7 +170,7 @@ class MiniTileMap(miniform.MiniAtom):
         return True
     
     def export_data(self, name: str, path: str) -> bool:
-        path = miniform.utils.rel_path(path)
+        path = path
         if not os.path.exists(path):
             miniform.MiniLogger.error(f"[MiniTileMap] failed to export tilemap data: (name){name} (path){path}")
             return False
@@ -146,7 +215,7 @@ class MiniTileMap(miniform.MiniAtom):
     def all_tiles(self, layer: int) -> list[MiniStaticObject|MiniDynamicObject]:
         return [tile[3] for tile in self.tile_data[layer].values()]
 
-    def set_tile(self, layer: int, pos: list[int], tile: int, tile_set: int, static: bool=True) -> None:
+    def set_tile(self, layer: int, pos: list[int], tile: int, tile_set: int, static: bool=True, regen: bool=True) -> None:
         layer = int(layer)
         if self.tile_data.get(layer, False) == False:
             miniform.MiniLogger.warning(f"[MiniTileMap] tilemap layer not found: (layer){layer}, {self.tile_data}")
@@ -166,6 +235,9 @@ class MiniTileMap(miniform.MiniAtom):
         
         self.tile_count += 1
         self.tile_data[layer][(gx, gy)] = [tile, tile_set, static, tile_object]
+        
+        if regen: self._gen_vertices(layer)
+        
         miniform.MiniLogger.info(f"[MiniTileMap] set tile: (layer){layer} (tile){tile} (tile_set){tile_set} (pos){gx, gy} (static){static}")
 
     def get_tile(self, layer: int, pos: list[int]) -> MiniStaticObject|MiniDynamicObject|None:
@@ -175,7 +247,7 @@ class MiniTileMap(miniform.MiniAtom):
             return
         return self.tile_data[layer].get((gx, gy), None)
     
-    def rem_tile(self, layer: int, pos: list[int]) -> None:
+    def rem_tile(self, layer: int, pos: list[int], regen: bool=True) -> None:
         if self.tile_data.get(layer, False) == False:
             miniform.MiniLogger.warning(f"[MiniTileMap] tilemap layer not found: (layer){layer}")
             return
@@ -188,8 +260,11 @@ class MiniTileMap(miniform.MiniAtom):
         tile, tile_set, static, tile_object = self.tile_data[layer][(gx, gy)]
         self.world.rem_object(tile_object)
 
-        self.tile_count += 1
+        self.tile_count -= 1
         del self.tile_data[layer][(gx, gy)]
+        
+        if regen: self._gen_vertices(layer)
+        
         miniform.MiniLogger.info(f"[MiniTileMap] rem tile: (layer){layer} (tile){tile} (tile_set){tile_set} (pos){gx, gy} (static){static}")
 
     def get_tile_region(self, layer: int, size:list[int], pos:list[int]) -> list[MiniStaticObject|MiniDynamicObject]:
@@ -202,17 +277,20 @@ class MiniTileMap(miniform.MiniAtom):
             if tile: tiles.append(tile)
         return tiles
 
-    def rem_tile_region(self, layer: int, size:list[int], pos:list[int]) -> None:
+    def rem_tile_region(self, layer: int, size:list[int], pos:list[int], regen: bool=True) -> None:
         if self.tile_data.get(layer, False) == False: return
         
         region = self._gen_region(size, pos)
         for gx, gy in region:
-            self.rem_tile(layer, miniform.utils.mul_v2([gx, gy], self.tile_size))
+            self.rem_tile(layer, miniform.utils.mul_v2([gx, gy], self.tile_size), 0)
+        
+        if regen: self._gen_vertices(layer)
     
-    def set_tile_region(self, layer: int, size:list[int], pos:list[int], tile: int, tile_set: int, static: bool=True) -> None:
+    def set_tile_region(self, layer: int, size:list[int], pos:list[int], tile: int, tile_set: int, static: bool=True, regen: bool=True) -> None:
         if self.tile_data.get(layer, False) == False: return
         
         region = self._gen_region(size, pos)
         for gx, gy in region:
-            self.set_tile(layer, miniform.utils.mul_v2([gx, gy], self.tile_size), tile, tile_set, static)
-            
+            self.set_tile(layer, miniform.utils.mul_v2([gx, gy], self.tile_size), tile, tile_set, static, 0)
+        
+        if regen: self._gen_vertices(layer)

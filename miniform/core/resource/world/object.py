@@ -35,7 +35,48 @@ class MiniStaticObject(miniform.MiniAtom):
     @property
     def center(self) -> list[float]:
         return miniform.utils.add_v2(self.pos, miniform.utils.div_v2(self.size, 2))
+
+    @property
+    def top_left(self) -> list[int|float]:
+        return [self.pos[0], self.pos[1]]
     
+    @property
+    def top_right(self) -> list[int|float]:
+        return [self.pos[0] + self.size[0], self.pos[1]]
+    
+    @property
+    def bottom_left(self) -> list[int|float]:
+        return [self.pos[0], self.pos[1] + self.size[1]]
+    
+    @property
+    def bottom_right(self) -> list[int|float]:
+        return [self.pos[0] + self.size[0], self.pos[1] + self.size[1]]
+    
+    @property
+    def left(self) -> list[int|float]:
+        return [self.pos[0], self.pos[1] + self.size[1] / 2]
+    
+    @property
+    def top(self) -> list[int|float]:
+        return [self.pos[0] + self.size[0] / 2, self.pos[1]]
+    
+    @property
+    def right(self) -> list[int|float]:
+        return [self.pos[0] + self.size[0], self.pos[1] + self.size[1] / 2]
+    
+    @property
+    def bottom(self) -> list[int|float]:
+        return [self.pos[0] + self.size[0] / 2, self.pos[1] + self.size[1]]
+
+    @property
+    def edges(self) -> list[int|float]:
+        return [
+            [self.pos[0], self.pos[1]],                                 # top-left
+            [self.pos[0] + self.size[0], self.pos[1]],                  # top-right
+            [self.pos[0], self.pos[1] + self.size[1]],                  # bottom-left
+            [self.pos[0] + self.size[0], self.pos[1] + self.size[1]],   # bottom-right
+        ]
+
     def render_hook(self) -> None: pass
 
 class MiniDynamicObject(MiniStaticObject):

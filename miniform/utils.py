@@ -109,8 +109,8 @@ def rel_path(path: str) -> str:
 
 def point_inside(point: list[int|float], bounds: list[int|float]) -> bool:
     return \
-        point[0] > bounds[0] and point[0] < bounds[0] + bounds[2] \
-    and point[1] > bounds[1] and point[1] < bounds[1] + bounds[3]
+        point[0] >= bounds[0] and point[0] <= bounds[0] + bounds[2] \
+    and point[1] >= bounds[1] and point[1] <= bounds[1] + bounds[3]
 
 def bsort(data: list[int]) -> list[int]:
     for i in range(len(data)-1, 0, -1):
@@ -160,7 +160,6 @@ def palette_swap(surface: pg.Surface, swap_map: list[list[int]]) -> pg.Surface:
     result = surface.copy()
     pixels = pg.PixelArray(result)
     for src_color, swap_color in swap_map:
-        print(src_color, swap_color)
         pixels.replace(surface.map_rgb(src_color), surface.map_rgb(swap_color))
     del pixels
     return result

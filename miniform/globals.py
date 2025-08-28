@@ -13,6 +13,11 @@ class MiniObjectFlag:
     OBJECT_STATIC: int =        (1 << 1)
     OBJECT_DYNAMIC: int =       (1 << 2)
     OBJECT_COLLISIONS: int =    (1 << 3)
+    OBJECT_N_EDGE: int =        (1 << 4)
+    OBJECT_S_EDGE: int =        (1 << 5)
+    OBJECT_E_EDGE: int =        (1 << 6)
+    OBJECT_W_EDGE: int =        (1 << 7)
+    OBJECT_IN_LIGHT: int =      (1 << 8)
 
 class MiniElementFlag:
     # Visibility flags

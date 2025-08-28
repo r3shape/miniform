@@ -126,7 +126,7 @@ class MiniCache(miniform.MiniAtom):
         del self.surfaces[key]
         miniform.MiniLogger.info(f"[MiniCache] Unloaded surface with key: '{key}'")
 
-    def load_animation(self, key: str, path: str, frame_size: list[int], frame_duration: float, loop: bool = True) -> None:
+    def load_animation(self, key: str, path: str, frame_size: list[int], frame_duration: float, loop: bool = True) -> bool:
         if key in self.surfaces:
             miniform.MiniLogger.warning(f"[MiniCache] Animation already exists: '{key}'. Use reload_animation() to overwrite.")
             return False
@@ -178,14 +178,20 @@ class MiniCache(miniform.MiniAtom):
         if not data:
             miniform.MiniLogger.warning(f"[MiniCache] Animation not found: '{key}'")
             return -1
+        
+        # total duration
+        return data[1][2] * len(data[0])
+
+    def get_animation_frame_duration(self, key: str) -> int:
+        data = self.get_animation(key)
+        if not data:
+            miniform.MiniLogger.warning(f"[MiniCache] Animation not found: '{key}'")
+            return -1
 
         #frame duration
         return data[1][2]
 
-        # total duration
-        # return data[1][2] * len(data[0])
-
-    def get_animation_frame(self, key: str) -> list:
+    def get_animation_frame(self, key: str) -> pg.Surface:
         data = self.get_animation(key)
         if not data:
             miniform.MiniLogger.warning(f"[MiniCache] Animation not found: '{key}'")

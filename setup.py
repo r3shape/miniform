@@ -1,6 +1,6 @@
 import setuptools
 
-version = [0, 1, 1]
+version = [0, 1, 2]
 
 setuptools.setup(
     name='miniform',
@@ -12,11 +12,13 @@ setuptools.setup(
     author_email='zafflins@gmail.com',
     url='https://github.com/r3shape/miniform',
     packages=setuptools.find_packages(),
-    #entry_points={
-    #    "console_scripts": []
-    #},
+    entry_points={
+       "console_scripts": [
+            "miniforge = miniform.scripts.miniforge.src.main:main"
+        ]
+    },
     install_requires=[
-        'pygame-ce'
+        'pytz', 'pygame-ce'
     ],
     classifiers=[
         'Programming Language :: Python :: 3.12',
